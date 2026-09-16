@@ -1,6 +1,16 @@
+const API_PROTOCOL = window.location.protocol === 'https:' ? 'https' : 'http';
+const WS_PROTOCOL = window.location.protocol === 'https:' ? 'wss' : 'ws';
+
 const API_HOST = window.location.hostname || 'localhost';
-const API_BASE_URL = `http://${API_HOST}:5000/api`;
-const WS_URL = `ws://${API_HOST}:5000/ws`;
+
+// Automatically detect production URL vs local dev server
+const API_BASE_URL = window.location.hostname.includes('vercel.app')
+  ? `https://${window.location.hostname}/api` // dynamic proxy/relative fallback
+  : `${API_PROTOCOL}://${API_HOST}:5000/api`;
+
+const WS_URL = window.location.hostname.includes('vercel.app')
+  ? `wss://${window.location.hostname}/ws`
+  : `${WS_PROTOCOL}://${API_HOST}:5000/ws`;
 
 export async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> {
   try {
