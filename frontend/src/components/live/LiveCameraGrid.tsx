@@ -10,7 +10,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { useAlert } from '../../context/AlertContext';
 import { fetchApi, wsClient } from '../../services/api';
-import { WildlifeSpecies, ThreatLevel, Camera, Zone, Incident, CameraSourceType, CameraProtocol, CameraPriority, BoundingBox } from '../../types/index';
+import { WildlifeSpecies, ThreatLevel, Camera, Zone, Incident, CameraSourceType, CameraProtocol, CameraPriority, BoundingBox, CameraFeed } from '../../types/index';
 import { wildlifeData } from '../../data/wildlifeInfo';
 import { CameraPlayer } from './CameraPlayer';
 
@@ -848,26 +848,26 @@ export const LiveCameraGrid: React.FC = () => {
                 </span>
               </div>
 
-              {wildlifeData[currentCam.currentDetection.species] && (
+              {wildlifeData[currentCam.currentDetection.species as WildlifeSpecies] && (
                 <div className="space-y-3">
                   <div className="aspect-video rounded-xl overflow-hidden border border-slate-800">
                     <img
-                      src={wildlifeData[currentCam.currentDetection.species].imageUrl}
+                      src={wildlifeData[currentCam.currentDetection.species as WildlifeSpecies].imageUrl}
                       alt={currentCam.currentDetection.species}
                       className="w-full h-full object-cover"
                     />
                   </div>
                   <div>
-                    <div className="text-sm font-black text-white">{wildlifeData[currentCam.currentDetection.species].commonName}</div>
-                    <div className="text-[9px] text-slate-500 italic mb-1">{wildlifeData[currentCam.currentDetection.species].scientificName}</div>
+                    <div className="text-sm font-black text-white">{wildlifeData[currentCam.currentDetection.species as WildlifeSpecies].commonName}</div>
+                    <div className="text-[9px] text-slate-500 italic mb-1">{wildlifeData[currentCam.currentDetection.species as WildlifeSpecies].scientificName}</div>
                     <p className="text-[10px] text-slate-400 leading-tight">
-                      {wildlifeData[currentCam.currentDetection.species].description}
+                      {wildlifeData[currentCam.currentDetection.species as WildlifeSpecies].description}
                     </p>
                   </div>
                   <div className="p-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
                     <div className="text-[8px] font-black text-emerald-400 uppercase mb-1">Deterrent Protocol</div>
                     <div className="text-[10px] text-emerald-200 leading-tight">
-                      {wildlifeData[currentCam.currentDetection.species].deterrentMethod}
+                      {wildlifeData[currentCam.currentDetection.species as WildlifeSpecies].deterrentMethod}
                     </div>
                   </div>
                 </div>

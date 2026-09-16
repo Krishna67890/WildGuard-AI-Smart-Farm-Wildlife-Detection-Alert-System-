@@ -1,17 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Camera, ThreatLevel, WildlifeSpecies, BoundingBox } from '../../types/index';
-
-interface CameraFeed extends Camera {
-  currentDetection?: {
-    threatLevel: ThreatLevel;
-    species: WildlifeSpecies;
-    confidence: number;
-    distanceMeters: number;
-    direction: string;
-    timestamp: string;
-    bbox?: BoundingBox;
-  };
-}
+import { Camera, ThreatLevel, WildlifeSpecies, BoundingBox, CameraFeed } from '../../types/index';
 
 interface CameraPlayerProps {
   camera: CameraFeed;

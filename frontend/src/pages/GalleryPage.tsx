@@ -4,7 +4,7 @@ import {
   ChevronRight, Heart, Share2, Download, ExternalLink,
   PawPrint, Leaf, Globe, AlertCircle, ArrowUpRight,
   Clock, Zap, Eye, Video, Image as ImageIcon,
-  Layers, BarChart3, Calendar, Play, Activity
+  Layers, BarChart3, Calendar, Play, Activity, RefreshCw
 } from 'lucide-react';
 import { fetchApi } from '../services/api';
 import { Detection, WildlifeSpecies } from '../types/index';

@@ -188,6 +188,18 @@ export interface Camera {
   perimeterLines?: VirtualPerimeterLine[];
 }
 
+export interface CameraFeed extends Camera {
+  currentDetection?: {
+    threatLevel: ThreatLevel;
+    species: WildlifeSpecies;
+    confidence: number;
+    distanceMeters: number;
+    direction: string;
+    timestamp: string;
+    bbox?: BoundingBox;
+  };
+}
+
 
 export interface IoTDevice {
   id: string;
