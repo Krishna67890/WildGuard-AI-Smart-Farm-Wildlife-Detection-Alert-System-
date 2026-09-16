@@ -3,14 +3,17 @@ const WS_PROTOCOL = window.location.protocol === 'https:' ? 'wss' : 'ws';
 
 const API_HOST = window.location.hostname || 'localhost';
 
-// Automatically detect production URL vs local dev server
-const API_BASE_URL = window.location.hostname.includes('vercel.app')
-  ? `https://${window.location.hostname}/api` // dynamic proxy/relative fallback
-  : `${API_PROTOCOL}://${API_HOST}:5000/api`;
+// Read from Vite environment variables if provided, with robust dynamic production fallbacks
+const ENV_API_URL = import.meta.env?.VITE_API_BASE_URL;
+const ENV_WS_URL = import.meta.env?.VITE_WS_URL;
 
-const WS_URL = window.location.hostname.includes('vercel.app')
-  ? `wss://${window.location.hostname}/ws`
-  : `${WS_PROTOCOL}://${API_HOST}:5000/ws`;
+const API_BASE_URL = ENV_API_URL || (window.location.hostname.includes('vercel.app')
+  ? `https://wildguard-ai-backend.onrender.com/api` // custom live proxy URL
+  : `${API_PROTOCOL}://${API_HOST}:5000/api`);
+
+const WS_URL = ENV_WS_URL || (window.location.hostname.includes('vercel.app')
+  ? `wss://wildguard-ai-backend.onrender.com/ws`
+  : `${WS_PROTOCOL}://${API_HOST}:5000/ws`);
 
 export async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> {
   try {
