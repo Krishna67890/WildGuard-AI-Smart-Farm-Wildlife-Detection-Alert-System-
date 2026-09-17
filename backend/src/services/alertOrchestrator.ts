@@ -53,11 +53,7 @@ export class AlertOrchestrator {
     }
 
     // Persist to store (and Firebase)
-    if ('saveIncident' in db) {
-      (db as any).saveIncident(newIncident);
-    } else {
-      db.incidents.unshift(newIncident);
-    }
+    db.saveIncident(newIncident);
 
     // Asynchronously dispatch notifications
     notificationService.dispatchAlert(newIncident).then(() => {
