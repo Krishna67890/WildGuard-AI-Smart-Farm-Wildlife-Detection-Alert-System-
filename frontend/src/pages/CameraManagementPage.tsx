@@ -391,9 +391,9 @@ export const CameraManagementPage: React.FC = () => {
                     Network Settings
                   </h3>
                   <div className="space-y-4">
-                    <div className="grid grid-cols-3 gap-3">
-                      <div className="col-span-2 space-y-1.5">
-                        <label className="text-[10px] font-bold text-slate-500 uppercase">IP Address</label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-slate-500 uppercase">IP Address / Host</label>
                         <input
                           type="text"
                           placeholder="192.168.1.100"

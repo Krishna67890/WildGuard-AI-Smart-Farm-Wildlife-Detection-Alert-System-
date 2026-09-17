@@ -9,7 +9,8 @@ const firebaseConfig = {
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "wildguard-ai",
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "wildguard-ai.appspot.com",
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "1234567890",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:1234567890:web:abcdef123456"
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:1234567890:web:abcdef123456",
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-WG99AIINTELLIGENCE"
 };
 
 const app = initializeApp(firebaseConfig);

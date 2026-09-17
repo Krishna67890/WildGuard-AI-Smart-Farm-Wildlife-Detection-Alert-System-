@@ -217,6 +217,19 @@ apiRouter.post('/iot/pir-trigger', (req: Request, res: Response) => {
 // ==========================================
 // 7. EXAMINER SIMULATION SUITE
 // ==========================================
+apiRouter.get('/detections', (req: Request, res: Response) => {
+  const { limit = 50, species, cameraId } = req.query;
+  let results = [...db.latestDetections];
+
+  if (species) results = results.filter(d => d.species === species);
+  if (cameraId) results = results.filter(d => d.cameraId === cameraId);
+
+  res.json({
+    success: true,
+    detections: results.slice(0, Number(limit))
+  });
+});
+
 apiRouter.post('/simulation/trigger', (req: Request, res: Response) => {
   const { scenario = 'leopard' } = req.body;
   const result = aiDetection.triggerSimulation(scenario);

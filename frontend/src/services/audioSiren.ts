@@ -23,7 +23,10 @@ class AudioSirenService {
       if (!this.ctx) return;
 
       if (this.ctx.state === 'suspended') {
-        this.ctx.resume();
+        console.log('[AudioSiren] AudioContext suspended, attempting resume...');
+        this.ctx.resume().catch(err => {
+          console.warn('[AudioSiren] Resume failed. User gesture required:', err.message);
+        });
       }
 
       this.oscillator = this.ctx.createOscillator();

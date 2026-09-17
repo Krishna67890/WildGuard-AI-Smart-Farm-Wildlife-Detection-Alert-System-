@@ -157,6 +157,19 @@ export const GalleryPage: React.FC = () => {
     }
   };
 
+  const mediaArchive = useMemo(() => {
+    // Generate some interesting looking placeholder media for the library
+    return Array.from({ length: 12 }).map((_, i) => ({
+      id: `media-${i}`,
+      type: i % 3 === 0 ? 'video' : 'image',
+      url: `https://images.unsplash.com/photo-1${500000000000 + (i * 123456)}?auto=format&fit=crop&q=80&w=800`,
+      timestamp: new Date(Date.now() - (i * 1000 * 60 * 60 * 2)).toISOString(),
+      sector: `Sector ${0 + (i % 4)}`,
+      filename: `HW_NODE_RECORD_${1000 + i}`,
+      species: ['leopard', 'tiger', 'elephant', 'wild_boar', 'deer'][i % 5]
+    }));
+  }, []);
+
   const filteredAnimals = useMemo(() =>
     animals.filter(animal =>
       animal.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -401,30 +414,30 @@ export const GalleryPage: React.FC = () => {
            </div>
 
            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {[...Array(12)].map((_, i) => (
-              <div key={i} className="group relative aspect-square bg-slate-900 border border-slate-800 rounded-[2rem] overflow-hidden cursor-pointer hover:border-emerald-500/50 transition-all hover:shadow-2xl hover:shadow-emerald-500/10">
+            {mediaArchive.map((media, i) => (
+              <div key={media.id} className="group relative aspect-square bg-slate-900 border border-slate-800 rounded-[2rem] overflow-hidden cursor-pointer hover:border-emerald-500/50 transition-all hover:shadow-2xl hover:shadow-emerald-500/10">
                 <div className="w-full h-full bg-slate-800/50 flex items-center justify-center relative overflow-hidden">
                   <ImageIcon className="w-10 h-10 text-slate-700 group-hover:scale-110 transition-transform duration-500" />
                   <img
-                    src={`https://images.unsplash.com/photo-15${8000000000 + i}?auto=format&fit=crop&q=60&w=400`}
-                    className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-100 transition-opacity duration-700"
-                    alt="Archive"
+                    src={media.url}
+                    className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-700"
+                    alt={media.filename}
                   />
                   <div className="absolute inset-0 bg-slate-950/20 group-hover:bg-transparent transition-colors" />
                 </div>
 
                 <div className="absolute top-4 left-4 right-4 flex justify-between items-start opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                    <span className="px-2 py-1 bg-black/60 backdrop-blur-md rounded-lg text-[8px] font-black text-white border border-white/10 uppercase">
-                     {i % 3 === 0 ? 'Video' : 'Snapshot'}
+                     {media.type}
                    </span>
                    <button className="p-2 bg-emerald-600 rounded-full text-white shadow-xl transform translate-y-2 group-hover:translate-y-0 transition-transform">
-                      <Play className="w-3 h-3 fill-current" />
+                      {media.type === 'video' ? <Play className="w-3 h-3 fill-current" /> : <Eye className="w-3 h-3" />}
                    </button>
                 </div>
 
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-6 flex flex-col justify-end">
-                  <div className="text-[10px] font-black text-emerald-400 uppercase mb-1">Sector {0 + (i%4)}</div>
-                  <div className="text-sm font-black text-white truncate">HW_NODE_RECORD_{1000 + i}</div>
+                  <div className="text-[10px] font-black text-emerald-400 uppercase mb-1">{media.sector} • {media.species}</div>
+                  <div className="text-sm font-black text-white truncate">{media.filename}</div>
                   <div className="flex items-center space-x-3 mt-3">
                     <button className="p-2 bg-white/10 hover:bg-emerald-500 hover:text-white rounded-lg transition-colors text-white/70">
                       <Download className="w-3.5 h-3.5" />
