@@ -8,11 +8,11 @@ const ENV_API_URL = import.meta.env?.VITE_API_BASE_URL;
 const ENV_WS_URL = import.meta.env?.VITE_WS_URL;
 
 const API_BASE_URL = ENV_API_URL || (window.location.hostname.includes('vercel.app')
-  ? `https://wildguard-ai-backend.onrender.com/api` // custom live proxy URL
+  ? `https://wildguard-ai-jc4i.onrender.com/api` // custom live proxy URL
   : `${API_PROTOCOL}://${API_HOST}:5000/api`);
 
 const WS_URL = ENV_WS_URL || (window.location.hostname.includes('vercel.app')
-  ? `wss://wildguard-ai-backend.onrender.com/ws`
+  ? `wss://wildguard-ai-jc4i.onrender.com/ws`
   : `${WS_PROTOCOL}://${API_HOST}:5000/ws`);
 
 export async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> {
