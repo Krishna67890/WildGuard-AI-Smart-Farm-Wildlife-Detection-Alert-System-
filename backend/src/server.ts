@@ -83,10 +83,10 @@ setInterval(() => {
   });
 }, 10000);
 
-server.listen(PORT, () => {
+server.listen(Number(PORT), '0.0.0.0', () => {
   console.log(`=======================================================`);
   console.log(`🐾 WildGuard AI Backend Server is RUNNING on port ${PORT}`);
-  console.log(`📡 WebSocket endpoint available at ws://localhost:${PORT}/ws`);
+  console.log(`📡 WebSocket endpoint available at /ws`);
   console.log(`⚡ Ethical Wildlife Protection & Threat Engine ACTIVE`);
   console.log(`=======================================================`);
 });
