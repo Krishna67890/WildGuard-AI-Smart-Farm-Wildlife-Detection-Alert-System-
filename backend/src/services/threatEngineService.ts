@@ -76,9 +76,19 @@ export class ThreatEngineService {
       input.durationSeconds >= config.minDetectionDurationSec
     );
 
+    // List of wild animals from the Encyclopedia gallery that trigger alarms
+    const GALLERY_WILD_ANIMALS = ['tiger', 'leopard', 'elephant', 'rhino', 'wild_boar', 'sloth_bear', 'gaur', 'snow_leopard'];
+    const isGalleryWildAnimal = GALLERY_WILD_ANIMALS.includes(input.species.toLowerCase());
+
     // 3. Multi-Factor Mathematical Formulation:
     // T = w_s*S + w_z*Z + w_c*C + w_d*D + w_m*M + w_h*H + w_n*N
-    const speciesWeight = config.speciesDangerMap[input.species] ?? 0.3;
+    let speciesWeight = config.speciesDangerMap[input.species] ?? 0.3;
+
+    // Auto-escalate weight for any gallery-matched wild animal
+    if (isGalleryWildAnimal) {
+       speciesWeight = Math.max(speciesWeight, 0.85);
+    }
+
     const zoneSeverity = config.zoneSeverityMap[zone.type] ?? 0.5;
     const confidenceFactor = Math.min(1.0, Math.max(0.0, input.confidence));
     
@@ -106,6 +116,11 @@ export class ThreatEngineService {
       (w.movement * movementFactor) +
       (w.humanCoexistence * humanFactor) +
       (w.density * densityFactor);
+
+    // Force high threat for gallery-matched wild animals
+    if (isGalleryWildAnimal) {
+       computedScore = Math.max(computedScore, 0.75);
+    }
 
     // If human is co-located with a top-tier apex predator (tiger, leopard, rogue elephant) within warning/critical zone, force elevate
     if (input.humanPresent && (input.species === 'tiger' || input.species === 'leopard') && (zone.type === 'CRITICAL' || zone.type === 'WARNING')) {
@@ -145,8 +160,9 @@ export class ThreatEngineService {
       reason = `LOW RISK: ${speciesLabel} detected outside sensitive zones (${distanceStr} distance). Herbivore/non-threatening behavior observed.`;
     }
 
-    const shouldTriggerAlarm = isConfirmed && (threatLevel === 'CRITICAL' || (threatLevel === 'HIGH' && zone.protectedArea));
-    const shouldNotifyFarmer = isConfirmed && (threatLevel !== 'LOW');
+    // If it's a wild animal from our gallery, trigger alarm automatically
+    const shouldTriggerAlarm = isConfirmed && (threatLevel === 'CRITICAL' || (threatLevel === 'HIGH' && zone.protectedArea) || isGalleryWildAnimal);
+    const shouldNotifyFarmer = isConfirmed && (threatLevel !== 'LOW' || isGalleryWildAnimal);
 
     return {
       threatLevel,

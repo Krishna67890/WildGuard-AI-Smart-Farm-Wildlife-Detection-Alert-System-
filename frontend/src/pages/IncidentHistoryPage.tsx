@@ -161,6 +161,34 @@ export const IncidentHistoryPage: React.FC<IncidentHistoryPageProps> = ({
 
       </div>
 
+      {/* Behavioral Analytics & Advanced Metrics Row */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
+          <div className="text-[10px] font-black text-slate-500 uppercase mb-1">Mean Threat Score</div>
+          <div className="text-xl font-black text-white">
+            {(incidents.reduce((acc, i) => acc + i.threatScore, 0) / (incidents.length || 1)).toFixed(2)}
+          </div>
+        </div>
+        <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
+          <div className="text-[10px] font-black text-slate-500 uppercase mb-1">Critical Alarms</div>
+          <div className="text-xl font-black text-rose-500">
+            {incidents.filter(i => i.threatLevel === 'CRITICAL').length}
+          </div>
+        </div>
+        <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
+          <div className="text-[10px] font-black text-slate-500 uppercase mb-1">Herbivore Frequency</div>
+          <div className="text-xl font-black text-emerald-500">
+            {incidents.filter(i => ['deer', 'monkey'].includes(i.species)).length}
+          </div>
+        </div>
+        <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
+          <div className="text-[10px] font-black text-slate-500 uppercase mb-1">Avg Dwell Time</div>
+          <div className="text-xl font-black text-cyan-400">
+            {Math.round(incidents.reduce((acc, i) => acc + i.durationSeconds, 0) / (incidents.length || 1))}s
+          </div>
+        </div>
+      </div>
+
       {/* Incidents Table */}
       <div className="bg-slate-900/80 rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
         <div className="overflow-x-auto">
