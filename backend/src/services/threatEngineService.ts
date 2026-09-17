@@ -89,7 +89,7 @@ export class ThreatEngineService {
        speciesWeight = Math.max(speciesWeight, 0.85);
     }
 
-    const zoneSeverity = config.zoneSeverityMap[zone.type as ZoneType] ?? 0.5;
+    const zoneSeverity = config.zoneSeverityMap[zone.type] ?? 0.5;
     const confidenceFactor = Math.min(1.0, Math.max(0.0, input.confidence));
     
     // Proximity factor: closer to 0 meters = higher risk (0 to 100m normalized)

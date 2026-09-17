@@ -202,7 +202,7 @@ export interface Camera {
   recordingMode: RecordingMode;
   notificationMode: 'ALL' | 'CRITICAL_ONLY' | 'MUTED';
   perimeterZones?: PerimeterZone[];
-  perimeterLines?: VirtualPerimeterLine[];
+  perimeterLines?: any[];
 }
 
 export interface IoTDevice {
