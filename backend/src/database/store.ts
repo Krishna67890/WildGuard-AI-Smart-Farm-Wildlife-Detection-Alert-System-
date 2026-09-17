@@ -95,6 +95,7 @@ class DataStore {
       resolutionNotes: 'Herbivore non-destructive grazing logged; no intervention required.'
     }
   ];
+  public notificationLogs: NotificationLog[] = [];
   public latestDetections: Detection[] = [];
 
   constructor() {
