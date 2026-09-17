@@ -1,5 +1,5 @@
 import { db } from '../database/store.js';
-import { Detection, Incident, AlarmStatus, IncidentStatus } from '../types/index.js';
+import { Detection, Incident, AlarmStatus, IncidentStatus, ZoneType, WildlifeSpecies, ThreatLevel } from '../types/index.js';
 import { iotBridge } from './iotBridgeService.js';
 import { notificationService } from './notificationService.js';
 
@@ -39,9 +39,8 @@ export class AlertOrchestrator {
       zoneId: detection.zoneId,
       zoneName: detection.zoneName,
       timestamp: detection.timestamp,
-      durationSeconds: detection.durationSeconds,
+      durationSeconds: detection.durationSeconds || 0,
       snapshotUrl: detection.frameImageUrl || `/snapshots/sample_${detection.species}.jpg`,
-      bbox: detection.bbox,
       alarmStatus: (detection.threatLevel === 'CRITICAL' || detection.threatLevel === 'HIGH') ? 'TRIGGERED' : 'STANDBY',
       notificationStatus: 'PENDING',
       status: 'ACTIVE'

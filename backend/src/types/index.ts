@@ -52,14 +52,73 @@ export interface PerimeterZone {
   dangerMultiplier: number;
 }
 
-export interface VirtualPerimeterLine {
+export interface Zone {
   id: string;
   name: string;
-  p1: { x: number; y: number }; // Normalized 0-100 coordinates
-  p2: { x: number; y: number };
+  type: ZoneType;
+  description?: string;
   color: string;
-  alertDirection: 'INTRUSION' | 'EXIT' | 'BOTH';
+  polygon: Array<{ x: number; y: number }>;
+  dangerMultiplier: number;
+  protectedArea?: boolean;
+  obfuscatedGpsCenter?: { lat: string; lng: string };
 }
+
+export interface BoundingBox {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+export interface Detection {
+  id: string;
+  species: WildlifeSpecies;
+  confidence: number;
+  bbox?: BoundingBox;
+  timestamp: string;
+  cameraId: string;
+  cameraName: string;
+  zoneId: string;
+  zoneName: string;
+  threatLevel: ThreatLevel;
+  threatScore: number;
+  threatReason: string;
+  distanceToBoundaryMeters?: number;
+  durationSeconds?: number;
+  direction?: 'APPROACHING' | 'RECEDING' | 'STATIONARY';
+  humanPresent?: boolean;
+  animalCount?: number;
+  frameImageUrl?: string;
+  isConfirmed: boolean;
+}
+
+export interface Incident {
+  id: string;
+  detectionId: string;
+  species: WildlifeSpecies;
+  confidence: number;
+  threatLevel: ThreatLevel;
+  threatScore: number;
+  threatReason: string;
+  cameraId: string;
+  cameraName: string;
+  zoneId: string;
+  zoneName: string;
+  timestamp: string;
+  durationSeconds: number;
+  snapshotUrl: string;
+  alarmStatus: AlarmStatus;
+  notificationStatus: 'PENDING' | 'SENT' | 'FAILED';
+  status: IncidentStatus;
+  acknowledgedBy?: string;
+  acknowledgedAt?: string;
+  resolvedBy?: string;
+  resolvedAt?: string;
+  resolutionNotes?: string;
+}
+
+export type AlarmStatus = 'STANDBY' | 'TRIGGERED' | 'MUTED' | 'DISMISSED';
 
 export interface DetectionRule {
   id: string;
