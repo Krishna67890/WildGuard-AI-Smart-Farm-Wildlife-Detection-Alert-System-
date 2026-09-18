@@ -14,7 +14,7 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => {
-  const { user, role, switchRole, logout } = useAuth();
+  const { user, role, logout } = useAuth();
   const { isSirenActive, isMuted, toggleMute, activeAlert } = useAlert();
 
   const navItems = [

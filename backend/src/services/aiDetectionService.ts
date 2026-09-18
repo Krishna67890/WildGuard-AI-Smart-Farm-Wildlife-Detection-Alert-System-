@@ -149,7 +149,7 @@ export class AIDetectionService {
           humanPresent: false,
           animalCount: 1,
           isSimulatedTrigger: true,
-          frameImageUrl: 'https://images.unsplash.com/photo-1507666405821-432ffb1670ae?auto=format&fit=crop&w=800&q=80'
+          frameImageUrl: 'https://images.unsplash.com/photo-1456926631375-92c8ce872def?auto=format&fit=crop&w=800&q=80'
         });
       }
 

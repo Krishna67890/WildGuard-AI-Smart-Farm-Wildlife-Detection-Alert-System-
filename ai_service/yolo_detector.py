@@ -23,15 +23,11 @@ ZONE_ID = "zone-1"
 
 # COCO to WildGuard Species Mapping
 # YOLO models trained on COCO detect animals like 'elephant', 'bear', 'zebra', 'horse', 'dog', etc.
-# Custom WildGuard weights specifically detect: leopard, tiger, elephant, wild_boar, deer, monkey
+# Specialized WildGuard configuration exclusively detects Panthera pardus (Leopard).
 COCO_TO_WILDGUARD_MAP = {
-    "cat": "leopard",      # In testing without custom dataset, cat maps to feline predator
-    "dog": "wild_boar",    # Proxy mapping for demo
-    "horse": "deer",
-    "sheep": "deer",
-    "cow": "elephant",
-    "elephant": "elephant",
-    "bear": "tiger",
+    "cat": "leopard",      # In testing, cat serves as a morphological proxy for leopard
+    "dog": "leopard",      # Mapped to leopard for conservative detection in field
+    "bear": "leopard",     # Mapped to leopard for conservative detection in field
     "person": "human"
 }
 
@@ -72,8 +68,8 @@ def run_simulation_loop():
     
     sample_detections = [
         ("leopard", 0.94, {"x": 0.32, "y": 0.28, "width": 0.36, "height": 0.44}, 12.0, False),
-        ("wild_boar", 0.88, {"x": 0.45, "y": 0.42, "width": 0.25, "height": 0.30}, 24.0, False),
-        ("deer", 0.91, {"x": 0.55, "y": 0.35, "width": 0.22, "height": 0.38}, 80.0, False),
+        ("leopard", 0.88, {"x": 0.45, "y": 0.42, "width": 0.25, "height": 0.30}, 24.0, False),
+        ("leopard", 0.91, {"x": 0.55, "y": 0.35, "width": 0.22, "height": 0.38}, 80.0, False),
     ]
 
     for species, conf, box, dist, human in sample_detections:

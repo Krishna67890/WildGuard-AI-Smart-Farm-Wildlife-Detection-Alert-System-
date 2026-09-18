@@ -38,7 +38,7 @@ In rural and fringe agricultural regions bordering national parks:
 
 ## 4. Objectives & Scope
 ### Primary Objectives:
-- Implement modular object detection identifying Leopard, Tiger, Elephant, Wild Boar, Deer, Monkey, and Humans.
+- Implement modular object detection identifying Leopard, Human, and Unknown.
 - Engineer a continuous multi-factor Threat Assessment Engine factoring species danger, distance to boundary, dwell time, movement vector, human presence, and density.
 - Build temporal multi-frame confirmation ($k \ge 3$) to eliminate false alarms.
 - Prototype an ESP32 IoT node with PIR motion sensing and 2.4kHz non-harm acoustic deterrence.
@@ -108,7 +108,7 @@ The system computes an objective threat score $T$:
 $$T = w_s \cdot S + w_z \cdot Z + w_c \cdot C + w_d \cdot D + w_m \cdot M + w_h \cdot H + w_n \cdot N$$
 
 Where:
-- $S$: Species Danger Tier (Tiger/Leopard = 1.0, Elephant = 0.85, Boar = 0.70, Deer = 0.25)
+- $S$: Species Danger Tier (Leopard = 1.0, Human = 0.10)
 - $Z$: Zone Proximity & Severity ($Z_{\text{type}} \times (1 - \text{dist}/100)$)
 - $C$: Detection Confidence ($C \in [0, 1]$)
 - $D$: Normalized Dwell Duration ($\min(1.0, \text{duration} / 30)$)
@@ -153,8 +153,8 @@ Structured entities for Users, Cameras, Zones, Detections, Incidents, and IoT De
 | Test Case ID | Test Scenario | Expected Result | Status |
 | :--- | :--- | :--- | :--- |
 | **TC-01** | Simulated Leopard in Zone 1 (Critical) | Bounding box rendered, $T \ge 0.85$, siren sounds, emergency modal appears | PASS |
-| **TC-02** | Simulated Deer in Zone 3 (Low) | $T < 0.35$, logged silently to database without siren trigger | PASS |
-| **TC-03** | Human + Tiger Co-occurrence | Immediate fail-safe elevation to CRITICAL ($T \ge 0.94$) | PASS |
+| **TC-02** | Simulated Leopard (Cub) in Zone 3 (Low) | $T < 0.35$, logged silently to database without siren trigger | PASS |
+| **TC-03** | Human + Leopard Co-occurrence | Immediate fail-safe elevation to CRITICAL ($T \ge 0.94$) | PASS |
 | **TC-04** | Single-frame Transient Noise (<2 frames) | Suppressed by Temporal Filter; zero false alarm | PASS |
 | **TC-05** | Farmer Alert Acknowledgment | Siren silenced, state updated: `ACTIVE` $\rightarrow$ `ACKNOWLEDGED` | PASS |
 | **TC-06** | ESP32 Heartbeat Telemetry | Node status online, battery % and signal dBm reported | PASS |

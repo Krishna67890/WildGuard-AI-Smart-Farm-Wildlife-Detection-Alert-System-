@@ -24,7 +24,7 @@ The system adheres to a Human-in-the-Loop (HITL) emergency architecture. The sof
 ### Q3: What computer vision architecture is implemented?
 **Answer:**
 The system uses a modular object detection architecture compatible with YOLOv8/YOLO11 and OpenCV. For each frame, the inference engine outputs:
-- Class label (Leopard, Tiger, Elephant, Wild Boar, Deer, Monkey, Human, Unknown)
+- Class label (Leopard, Human, Unknown)
 - Confidence score ($C \in [0, 1]$)
 - Normalized bounding box coordinates $[x, y, w, h]$
 - Centroid motion vector (Approaching, Receding, Stationary)
@@ -47,7 +47,7 @@ Through a **Temporal Multi-Frame Confirmation Filter**:
 The continuous threat score $T \in [0, 1]$ is computed as:
 $$T = w_s \cdot S + w_z \cdot Z + w_c \cdot C + w_d \cdot D + w_m \cdot M + w_h \cdot H + w_n \cdot N$$
 Where:
-- $S$: Species Danger Tier (Tiger/Leopard = 1.0, Elephant = 0.85, Boar = 0.70, Deer = 0.25)
+- $S$: Species Danger Tier (Leopard = 1.0, Human = 0.10)
 - $Z$: Zone Severity & Distance Proximity (Critical = 1.0, Warning = 0.75, Safe = 0.10)
 - $C$: Detection Confidence ($0.0 - 1.0$)
 - $D$: Dwell Duration (normalized up to 30 seconds)

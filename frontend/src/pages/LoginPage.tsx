@@ -19,7 +19,9 @@ const LoginPage: React.FC = () => {
     setError('');
     try {
       if (isRegisterMode) {
-        await register(email, password, name, farmName, phone);
+        const farmId = `FARM-${Math.floor(Math.random() * 10000)}`;
+        const systemId = `WG-${Math.floor(Math.random() * 1000000)}`;
+        await register(email, password, name, farmName, phone, farmId, systemId);
       } else {
         await login(email, password);
       }

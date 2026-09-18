@@ -26,7 +26,9 @@ export type CameraSourceType =
   | 'INTERNAL_HARDWARE'
   | 'RTSP' 
   | 'HTTP_HLS'
-  | 'WEBRTC';
+  | 'WEBRTC'
+  | 'BROWSER_WEBCAM'
+  | 'SIMULATION';
 
 export type CameraProtocol = 'RTSP' | 'HLS' | 'HTTP' | 'WEBRTC' | 'UDP' | 'TCP';
 
