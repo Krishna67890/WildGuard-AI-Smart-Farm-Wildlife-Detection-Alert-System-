@@ -140,14 +140,7 @@ export const LiveCameraGrid: React.FC = () => {
         if (camRes.success && zoneRes.success) {
           const fetchedCameras = camRes.cameras.map((cam: Camera) => ({
             ...cam,
-            currentDetection: cam.status === 'CRITICAL' ? {
-              threatLevel: 'CRITICAL',
-              species: 'leopard',
-              confidence: 0.94,
-              distanceMeters: 12,
-              direction: 'APPROACHING',
-              timestamp: new Date().toISOString()
-            } : undefined
+            currentDetection: undefined
           }));
 
           setCameras(fetchedCameras);

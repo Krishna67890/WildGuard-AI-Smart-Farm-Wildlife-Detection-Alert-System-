@@ -50,7 +50,7 @@ apiRouter.get('/dashboard/summary', (req: Request, res: Response) => {
       latestIncidents: db.incidents.slice(0, 5),
       latestDetections: db.latestDetections.slice(0, 6),
       highRiskZones: db.zones.filter(z => z.type === 'CRITICAL' || z.type === 'WARNING'),
-      activeCriticalIncident: activeIncidents.find(i => i.threatLevel === 'CRITICAL') || null
+      activeCriticalIncident: null
     }
   });
 });

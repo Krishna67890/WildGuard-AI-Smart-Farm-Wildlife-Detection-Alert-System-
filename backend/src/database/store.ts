@@ -25,7 +25,7 @@ class DataStore {
       snapshotUrl: 'https://images.unsplash.com/photo-1615963244664-5b84436ba15e?auto=format&fit=crop&w=800&q=80',
       alarmStatus: 'TRIGGERED',
       notificationStatus: 'SENT',
-      status: 'ACTIVE'
+      status: 'RESOLVED'
     },
     {
       id: 'INC-2026-0902',
