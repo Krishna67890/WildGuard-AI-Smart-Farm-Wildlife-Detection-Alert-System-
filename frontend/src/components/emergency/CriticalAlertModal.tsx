@@ -117,12 +117,12 @@ export const CriticalAlertModal: React.FC<CriticalAlertModalProps> = ({
           <div className="flex items-center justify-between px-4 py-3 rounded-lg bg-rose-500/10 border border-rose-500/30">
             <div className="flex items-center space-x-2">
               <span className="relative flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-500"></span>
+                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${activeAlert.alarmStatus === 'TRIGGERED' ? 'bg-rose-400' : 'bg-slate-400'}`}></span>
+                <span className={`relative inline-flex rounded-full h-3 w-3 ${activeAlert.alarmStatus === 'TRIGGERED' ? 'bg-rose-500' : 'bg-slate-500'}`}></span>
               </span>
               <span className="text-xs font-bold text-slate-300">Alarm Status:</span>
-              <span className="text-xs font-extrabold text-rose-400 uppercase tracking-wider">
-                {activeAlert.alarmStatus} (ESP32 Acoustic Siren Active)
+              <span className={`text-xs font-extrabold uppercase tracking-wider ${activeAlert.alarmStatus === 'TRIGGERED' ? 'text-rose-400' : 'text-slate-400'}`}>
+                {activeAlert.alarmStatus} {activeAlert.alarmStatus === 'TRIGGERED' && '(ESP32 Acoustic Siren Active)'}
               </span>
             </div>
             <span className="text-[11px] px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-800 font-mono font-bold">

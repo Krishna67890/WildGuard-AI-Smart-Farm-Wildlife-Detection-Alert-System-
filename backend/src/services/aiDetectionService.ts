@@ -62,7 +62,7 @@ export class AIDetectionService {
   }
 
   /**
-   * Preset Examiner Demo Scenarios
+   * Preset Examiner Demo Scenarios (Leopard-Centric)
    */
   public triggerSimulation(scenarioType: string): { detection: Detection; incidentCreated: boolean } {
     switch (scenarioType) {
@@ -80,13 +80,13 @@ export class AIDetectionService {
           humanPresent: false,
           animalCount: 1,
           isSimulatedTrigger: true,
-          frameImageUrl: '/snapshots/sample_leopard.jpg'
+          frameImageUrl: 'https://images.unsplash.com/photo-1575550959106-5a7defe28b56?auto=format&fit=crop&w=800&q=80'
         });
       }
 
-      case 'wild_boar': {
+      case 'leopard_group': {
         return this.processDetection({
-          species: 'wild_boar',
+          species: 'leopard',
           confidence: 0.89,
           bbox: { x: 0.45, y: 0.42, width: 0.25, height: 0.30 },
           cameraId: 'cam-2',
@@ -95,15 +95,15 @@ export class AIDetectionService {
           durationSeconds: 35,
           direction: 'APPROACHING',
           humanPresent: false,
-          animalCount: 4,
+          animalCount: 2,
           isSimulatedTrigger: true,
-          frameImageUrl: '/snapshots/sample_boar.jpg'
+          frameImageUrl: 'https://images.unsplash.com/photo-1615963244664-5b84436ba15e?auto=format&fit=crop&w=800&q=80'
         });
       }
 
-      case 'elephant': {
+      case 'leopard_stationary': {
         return this.processDetection({
-          species: 'elephant',
+          species: 'leopard',
           confidence: 0.97,
           bbox: { x: 0.25, y: 0.20, width: 0.50, height: 0.60 },
           cameraId: 'cam-2',
@@ -112,15 +112,15 @@ export class AIDetectionService {
           durationSeconds: 52,
           direction: 'STATIONARY',
           humanPresent: false,
-          animalCount: 2,
+          animalCount: 1,
           isSimulatedTrigger: true,
-          frameImageUrl: '/snapshots/sample_elephant.jpg'
+          frameImageUrl: 'https://images.unsplash.com/photo-1602491453631-e2a5ad90a131?auto=format&fit=crop&w=800&q=80'
         });
       }
 
-      case 'human_wildlife': {
+      case 'human_risk': {
         return this.processDetection({
-          species: 'tiger',
+          species: 'human', // The primary intruder being simulated here is a human for risk assessment
           confidence: 0.93,
           bbox: { x: 0.20, y: 0.25, width: 0.35, height: 0.45 },
           cameraId: 'cam-3',
@@ -131,13 +131,14 @@ export class AIDetectionService {
           humanPresent: true,
           animalCount: 1,
           isSimulatedTrigger: true,
-          frameImageUrl: '/snapshots/sample_tiger.jpg'
+          frameImageUrl: 'https://images.unsplash.com/photo-1508333706533-1ab43ecb16ad?auto=format&fit=crop&w=800&q=80'
         });
       }
 
+      case 'leopard_cub':
       case 'low_threat': {
         return this.processDetection({
-          species: 'deer',
+          species: 'leopard',
           confidence: 0.88,
           bbox: { x: 0.55, y: 0.35, width: 0.22, height: 0.38 },
           cameraId: 'cam-4',
@@ -146,15 +147,15 @@ export class AIDetectionService {
           durationSeconds: 15,
           direction: 'RECEDING',
           humanPresent: false,
-          animalCount: 3,
+          animalCount: 1,
           isSimulatedTrigger: true,
-          frameImageUrl: '/snapshots/sample_deer.jpg'
+          frameImageUrl: 'https://images.unsplash.com/photo-1507666405821-432ffb1670ae?auto=format&fit=crop&w=800&q=80'
         });
       }
 
       default: {
         return this.processDetection({
-          species: 'monkey',
+          species: 'human',
           confidence: 0.82,
           bbox: { x: 0.40, y: 0.30, width: 0.18, height: 0.25 },
           cameraId: 'cam-4',
@@ -163,9 +164,9 @@ export class AIDetectionService {
           durationSeconds: 12,
           direction: 'STATIONARY',
           humanPresent: false,
-          animalCount: 2,
+          animalCount: 1,
           isSimulatedTrigger: true,
-          frameImageUrl: '/snapshots/sample_monkey.jpg'
+          frameImageUrl: '/snapshots/sample_human.jpg'
         });
       }
     }

@@ -16,8 +16,7 @@ import { CameraPlayer } from './CameraPlayer';
 
 type ViewMode = 'FOCUS' | 'GRID' | 'SECTOR';
 export const LiveCameraGrid: React.FC = () => {
-  const { canAdmin } = useAuth();
-  const { activeAlert } = useAlert();
+  const { activeAlert, setActiveAlert, setIsSirenActive, addToast } = useAlert();
   const [cameras, setCameras] = useState<CameraFeed[]>([]);
   const [zones, setZones] = useState<Zone[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,13 +26,28 @@ export const LiveCameraGrid: React.FC = () => {
   const [autoFocusCritical, setAutoFocusCritical] = useState<boolean>(false);
   const [timeline, setTimeline] = useState<any[]>([]);
   const [availableDevices, setAvailableDevices] = useState<MediaDeviceInfo[]>([]);
-
-  // Add Camera Modal State
-  const [showAddModal, setShowAddModal] = useState<boolean>(false);
-  const [testingConnection, setTestingConnection] = useState<boolean>(false);
-  const [testResult, setTestResult] = useState<{ success: boolean; message: string; stats?: any } | null>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
   const [previewStream, setPreviewStream] = useState<MediaStream | null>(null);
-  const previewVideoRef = useRef<HTMLVideoElement | null>(null);
+  const [testingConnection, setTestingConnection] = useState(false);
+  const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
+  const previewVideoRef = useRef<HTMLVideoElement>(null);
+
+  // Synchronize Local Critical State with Global Alarm
+  useEffect(() => {
+    const criticalCam = cameras.find(c =>
+      (c.status === 'CRITICAL' || c.currentDetection?.threatLevel === 'CRITICAL') &&
+      c.currentDetection?.species.toLowerCase() === 'leopard'
+    );
+
+    if (criticalCam && !activeAlert) {
+      setIsSirenActive(true);
+      addToast(
+        'LEOPARD DETECTED',
+        `Apex predator (Leopard) detected on ${criticalCam.name}. Siren active.`,
+        'CRITICAL'
+      );
+    }
+  }, [cameras, activeAlert, setIsSirenActive, addToast]);
 
   const [newCam, setNewCam] = useState<Partial<Camera>>({
     name: '',
@@ -52,7 +66,7 @@ export const LiveCameraGrid: React.FC = () => {
     locationDescription: '',
     detectionEnabled: true,
     minConfidence: 0.65,
-    animalCategories: ['leopard', 'tiger', 'elephant', 'wild_boar', 'human'],
+    animalCategories: ['leopard', 'human'],
     minDetectionDurationSec: 2,
     zoneDetectionEnabled: true,
     alarmEnabled: true,
@@ -411,34 +425,34 @@ export const LiveCameraGrid: React.FC = () => {
     <div className="flex flex-col space-y-4 min-h-[calc(100vh-120px)]">
       
       {/* 9. GLOBAL LIVE STATUS BAR */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-        <div className="bg-slate-900 border border-slate-800 p-3 rounded-xl flex flex-col items-center justify-center">
-          <span className="text-[10px] text-slate-500 font-bold uppercase">Cameras</span>
-          <span className="text-xl font-black text-white">{stats.total}</span>
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2 md:gap-3">
+        <div className="bg-slate-900 border border-slate-800 p-2 md:p-3 rounded-xl flex flex-col items-center justify-center">
+          <span className="text-[9px] md:text-[10px] text-slate-500 font-bold uppercase">Cameras</span>
+          <span className="text-lg md:text-xl font-black text-white">{stats.total}</span>
         </div>
-        <div className="bg-slate-900 border border-slate-800 p-3 rounded-xl flex flex-col items-center justify-center">
-          <span className="text-[10px] text-slate-500 font-bold uppercase">Live</span>
-          <span className="text-xl font-black text-emerald-400">{stats.live}</span>
+        <div className="bg-slate-900 border border-slate-800 p-2 md:p-3 rounded-xl flex flex-col items-center justify-center">
+          <span className="text-[9px] md:text-[10px] text-slate-500 font-bold uppercase">Live</span>
+          <span className="text-lg md:text-xl font-black text-emerald-400">{stats.live}</span>
         </div>
-        <div className="bg-slate-900 border border-slate-800 p-3 rounded-xl flex flex-col items-center justify-center">
-          <span className="text-[10px] text-slate-500 font-bold uppercase">Offline</span>
-          <span className="text-xl font-black text-rose-500">{stats.offline}</span>
+        <div className="bg-slate-900 border border-slate-800 p-2 md:p-3 rounded-xl flex flex-col items-center justify-center">
+          <span className="text-[9px] md:text-[10px] text-slate-500 font-bold uppercase">Offline</span>
+          <span className="text-lg md:text-xl font-black text-rose-500">{stats.offline}</span>
         </div>
-        <div className="bg-slate-900 border border-slate-800 p-3 rounded-xl flex flex-col items-center justify-center">
-          <span className="text-[10px] text-slate-500 font-bold uppercase">AI Active</span>
-          <span className="text-xl font-black text-cyan-400">{stats.aiActive}</span>
+        <div className="bg-slate-900 border border-slate-800 p-2 md:p-3 rounded-xl flex flex-col items-center justify-center">
+          <span className="text-[9px] md:text-[10px] text-slate-500 font-bold uppercase">AI Active</span>
+          <span className="text-lg md:text-xl font-black text-cyan-400">{stats.aiActive}</span>
         </div>
-        <div className="bg-slate-900 border border-slate-800 p-3 rounded-xl flex flex-col items-center justify-center">
-          <span className="text-[10px] text-slate-500 font-bold uppercase">Alerts</span>
-          <span className="text-xl font-black text-amber-500">{stats.activeAlerts}</span>
+        <div className="bg-slate-900 border border-slate-800 p-2 md:p-3 rounded-xl flex flex-col items-center justify-center">
+          <span className="text-[9px] md:text-[10px] text-slate-500 font-bold uppercase">Alerts</span>
+          <span className="text-lg md:text-xl font-black text-amber-500">{stats.activeAlerts}</span>
         </div>
-        <div className="bg-slate-900 border border-slate-800 p-3 rounded-xl flex flex-col items-center justify-center">
-          <span className="text-[10px] text-slate-500 font-bold uppercase">Animals</span>
-          <span className="text-xl font-black text-emerald-500">03</span>
+        <div className="bg-slate-900 border border-slate-800 p-2 md:p-3 rounded-xl flex flex-col items-center justify-center">
+          <span className="text-[9px] md:text-[10px] text-slate-500 font-bold uppercase">Animals</span>
+          <span className="text-lg md:text-xl font-black text-emerald-500">03</span>
         </div>
-        <div className="bg-slate-900 border border-rose-900/50 p-3 rounded-xl flex flex-col items-center justify-center shadow-lg shadow-rose-950/20">
-          <span className="text-[10px] text-rose-400 font-bold uppercase">Critical</span>
-          <span className="text-xl font-black text-rose-500 animate-pulse">{stats.critical}</span>
+        <div className="bg-slate-900 border border-rose-900/50 p-2 md:p-3 rounded-xl flex flex-col items-center justify-center shadow-lg shadow-rose-950/20 col-span-2 md:col-span-1">
+          <span className="text-[9px] md:text-[10px] text-rose-400 font-bold uppercase">Critical</span>
+          <span className="text-lg md:text-xl font-black text-rose-500 animate-pulse">{stats.critical}</span>
         </div>
       </div>
 
@@ -464,25 +478,25 @@ export const LiveCameraGrid: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-6">
+        <div className="flex flex-wrap gap-2 md:gap-6">
           {Object.entries(sectors).map(([sector, cams]) => (
-            <div key={sector} className="space-y-2">
+            <div key={sector} className="space-y-2 w-full md:w-auto">
               <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-tighter border-b border-slate-800 pb-1">
                 {sector}
               </h3>
-              <div className="flex gap-2">
+              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
                 {cams.map(cam => (
                   <button
                     key={cam.id}
                     onClick={() => setSelectedCameraId(cam.id)}
-                    className={`group relative flex flex-col p-2 rounded-xl border transition-all w-32 ${
+                    className={`group relative flex flex-col p-2 rounded-xl border transition-all w-28 md:w-32 flex-shrink-0 ${
                       selectedCameraId === cam.id
                         ? 'bg-emerald-950/40 border-emerald-500 ring-1 ring-emerald-500'
                         : 'bg-slate-950 border-slate-800 hover:border-slate-700'
                     }`}
                   >
                     <div className="flex items-center justify-between w-full mb-1">
-                      <span className="text-[9px] font-bold text-slate-300 truncate w-20 text-left">{cam.name}</span>
+                      <span className="text-[9px] font-bold text-slate-300 truncate w-16 md:w-20 text-left">{cam.name}</span>
                       <div className={`w-1.5 h-1.5 rounded-full ${
                         cam.status === 'OFFLINE' ? 'bg-slate-600' :
                         cam.status === 'CRITICAL' ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'
@@ -510,7 +524,7 @@ export const LiveCameraGrid: React.FC = () => {
           {/* 16. ADD CAMERA QUICK ACTION */}
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex flex-col items-center justify-center p-2 rounded-xl border border-dashed border-slate-700 hover:border-emerald-500 hover:bg-emerald-500/5 transition-all w-32 aspect-[4/5] text-slate-500 hover:text-emerald-500"
+            className="flex flex-col items-center justify-center p-2 rounded-xl border border-dashed border-slate-700 hover:border-emerald-500 hover:bg-emerald-500/5 transition-all w-28 md:w-32 aspect-[4/5] text-slate-500 hover:text-emerald-500 flex-shrink-0"
           >
             <Plus className="w-6 h-6 mb-2" />
             <span className="text-[10px] font-bold uppercase">Add Camera</span>
@@ -588,53 +602,53 @@ export const LiveCameraGrid: React.FC = () => {
               </div>
 
               {/* 13. CAMERA CONTROL BAR */}
-              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] bg-slate-950/90 backdrop-blur-xl border border-slate-800 rounded-2xl p-2 flex items-center justify-between shadow-2xl">
-                <div className="flex items-center space-x-1 px-4">
+              <div className="absolute bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 w-[95%] md:w-[90%] bg-slate-950/90 backdrop-blur-xl border border-slate-800 rounded-2xl p-1 md:p-2 flex items-center justify-between shadow-2xl overflow-x-auto scrollbar-hide">
+                <div className="flex items-center space-x-1 px-2 md:px-4">
                    <button
                     onClick={() => handleCameraAction('START')}
-                    className="p-2 text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition" title="Start">
-                     <Play className="w-5 h-5" />
+                    className="p-1.5 md:p-2 text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition" title="Start">
+                     <Play className="w-4 h-4 md:w-5 md:h-5" />
                    </button>
                    <button
                     onClick={() => handleCameraAction('STOP')}
-                    className="p-2 text-rose-400 hover:bg-rose-500/10 rounded-lg transition" title="Stop">
-                     <Power className="w-5 h-5" />
+                    className="p-1.5 md:p-2 text-rose-400 hover:bg-rose-500/10 rounded-lg transition" title="Stop">
+                     <Power className="w-4 h-4 md:w-5 md:h-5" />
                    </button>
                    <button
                     onClick={() => handleCameraAction('RESTART')}
-                    className="p-2 text-slate-400 hover:bg-slate-800 rounded-lg transition" title="Restart">
-                     <RefreshCw className="w-4 h-4" />
+                    className="p-1.5 md:p-2 text-slate-400 hover:bg-slate-800 rounded-lg transition" title="Restart">
+                     <RefreshCw className="w-3.5 h-3.5 md:w-4 md:h-4" />
                    </button>
                 </div>
 
-                <div className="h-8 w-px bg-slate-800 mx-2" />
+                <div className="h-6 md:h-8 w-px bg-slate-800 mx-1 md:mx-2" />
 
                 <div className="flex items-center space-x-1">
                    <button
                     onClick={() => handleCameraAction('SNAPSHOT')}
-                    className="p-2 text-slate-400 hover:bg-slate-800 rounded-lg transition" title="Capture Snapshot">
-                     <Activity className="w-5 h-5" />
+                    className="p-1.5 md:p-2 text-slate-400 hover:bg-slate-800 rounded-lg transition" title="Capture Snapshot">
+                     <Activity className="w-4 h-4 md:w-5 md:h-5" />
                    </button>
-                   <button className="p-2 text-slate-400 hover:bg-slate-800 rounded-lg transition" title="Record">
-                     <Monitor className="w-5 h-5" />
+                   <button className="p-1.5 md:p-2 text-slate-400 hover:bg-slate-800 rounded-lg transition" title="Record">
+                     <Monitor className="w-4 h-4 md:w-5 md:h-5" />
                    </button>
-                   <button className="p-2 text-slate-400 hover:bg-slate-800 rounded-lg transition" title="Settings">
-                     <Settings className="w-5 h-5" />
+                   <button className="p-1.5 md:p-2 text-slate-400 hover:bg-slate-800 rounded-lg transition" title="Settings">
+                     <Settings className="w-4 h-4 md:w-5 md:h-5" />
                    </button>
                 </div>
 
-                <div className="h-8 w-px bg-slate-800 mx-2" />
+                <div className="h-6 md:h-8 w-px bg-slate-800 mx-1 md:mx-2" />
 
-                <div className="flex items-center space-x-1 px-4">
+                <div className="flex items-center space-x-1 px-2 md:px-4">
                    <button
                     onClick={() => setIsNightVision(!isNightVision)}
-                    className={`p-2 rounded-lg transition ${isNightVision ? 'text-emerald-400 bg-emerald-500/10' : 'text-slate-400 hover:bg-slate-800'}`}
+                    className={`p-1.5 md:p-2 rounded-lg transition ${isNightVision ? 'text-emerald-400 bg-emerald-500/10' : 'text-slate-400 hover:bg-slate-800'}`}
                     title="Night Vision"
                    >
-                     <Eye className="w-5 h-5" />
+                     <Eye className="w-4 h-4 md:w-5 md:h-5" />
                    </button>
-                   <button className="p-2 text-slate-400 hover:bg-slate-800 rounded-lg transition" title="Fullscreen">
-                     <Maximize2 className="w-5 h-5" />
+                   <button className="p-1.5 md:p-2 text-slate-400 hover:bg-slate-800 rounded-lg transition" title="Fullscreen">
+                     <Maximize2 className="w-4 h-4 md:w-5 md:h-5" />
                    </button>
                 </div>
               </div>
@@ -1125,7 +1139,7 @@ export const LiveCameraGrid: React.FC = () => {
                     <div className="space-y-2">
                       <label className="text-[9px] font-black text-slate-500 uppercase">Species Watchlist</label>
                       <div className="flex flex-wrap gap-2">
-                        {['leopard', 'tiger', 'elephant', 'wild_boar', 'human'].map(cat => (
+                        {['leopard', 'human'].map(cat => (
                           <button
                             key={cat}
                             type="button"

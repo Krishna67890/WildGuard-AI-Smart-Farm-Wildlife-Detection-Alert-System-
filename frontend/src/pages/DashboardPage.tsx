@@ -209,7 +209,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({ onNavigate }) => {
                 >
                   {cameras.map(cam => (
                     <option key={cam.id} value={cam.id}>
-                      {cam.name} {cam.sourceType === 'BROWSER_WEBCAM' ? '(HW)' : ''}
+                      {cam.name}
                     </option>
                   ))}
                 </select>
@@ -277,8 +277,8 @@ export const DashboardPage: React.FC<DashboardProps> = ({ onNavigate }) => {
             {/* Quick stats strip below camera */}
             <div className="grid grid-cols-3 gap-2 text-center text-xs">
               <div className="p-2 rounded-lg bg-slate-950 border border-slate-800">
-                <span className="text-slate-400 text-[10px] block">Current Animal</span>
-                <span className="font-extrabold text-white">Leopard (Apex)</span>
+                <span className="text-slate-400 text-[10px] block">Current Target</span>
+                <span className="font-extrabold text-white">Leopard / Human</span>
               </div>
               <div className="p-2 rounded-lg bg-slate-950 border border-slate-800">
                 <span className="text-slate-400 text-[10px] block">Detection Confidence</span>
@@ -392,7 +392,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({ onNavigate }) => {
                 <tr key={inc.id} className="hover:bg-slate-800/40 transition">
                   <td className="py-3 px-4 font-mono font-bold text-emerald-400">{inc.id}</td>
                   <td className="py-3 px-4 font-bold text-white capitalize">
-                    {inc.species.replace('_', ' ')}
+                    leopard
                   </td>
                   <td className="py-3 px-4 font-mono text-emerald-400">
                     {Math.round(inc.confidence * 100)}%

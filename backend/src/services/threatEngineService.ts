@@ -76,8 +76,8 @@ export class ThreatEngineService {
       input.durationSeconds >= config.minDetectionDurationSec
     );
 
-    // List of wild animals from the Encyclopedia gallery that trigger alarms
-    const GALLERY_WILD_ANIMALS = ['tiger', 'leopard', 'elephant', 'rhino', 'wild_boar', 'sloth_bear', 'gaur', 'snow_leopard'];
+    // List of wild animals from the Encyclopedia gallery that trigger alarms (Leopard-centric)
+    const GALLERY_WILD_ANIMALS = ['leopard'];
     const isGalleryWildAnimal = GALLERY_WILD_ANIMALS.includes(input.species.toLowerCase());
 
     // 3. Multi-Factor Mathematical Formulation:
@@ -104,7 +104,7 @@ export class ThreatEngineService {
     // Human coexistence risk factor (critical multiplier when predators + humans are present)
     const humanFactor = input.humanPresent ? (speciesWeight >= 0.7 ? 1.0 : 0.5) : 0.0;
     
-    // Density factor (pack/herd behavior: e.g. multiple boars or elephants)
+    // Density factor (pack behavior: e.g. multiple humans or leopards)
     const densityFactor = Math.min(1.0, input.animalCount / 5);
 
     const w = config.weights;
@@ -122,8 +122,8 @@ export class ThreatEngineService {
        computedScore = Math.max(computedScore, 0.75);
     }
 
-    // If human is co-located with a top-tier apex predator (tiger, leopard, rogue elephant) within warning/critical zone, force elevate
-    if (input.humanPresent && (input.species === 'tiger' || input.species === 'leopard') && (zone.type === 'CRITICAL' || zone.type === 'WARNING')) {
+    // If human is co-located with a leopard within warning/critical zone, force elevate
+    if (input.humanPresent && input.species === 'leopard' && (zone.type === 'CRITICAL' || zone.type === 'WARNING')) {
       computedScore = Math.max(computedScore, 0.94);
     }
 
@@ -157,12 +157,17 @@ export class ThreatEngineService {
     } else if (threatLevel === 'MEDIUM') {
       reason = `MEDIUM ADVISORY: ${speciesLabel} detected near ${zone.name} (${distanceStr} distance). Continuous surveillance active; non-intrusive monitoring recommended.`;
     } else {
-      reason = `LOW RISK: ${speciesLabel} detected outside sensitive zones (${distanceStr} distance). Herbivore/non-threatening behavior observed.`;
+      reason = `LOW RISK: ${speciesLabel} detected outside sensitive zones (${distanceStr} distance). Non-threatening movement observed.`;
     }
 
-    // If it's a wild animal from our gallery, trigger alarm automatically
-    const shouldTriggerAlarm = isConfirmed && (threatLevel === 'CRITICAL' || (threatLevel === 'HIGH' && zone.protectedArea) || isGalleryWildAnimal);
-    const shouldNotifyFarmer = isConfirmed && (threatLevel !== 'LOW' || isGalleryWildAnimal);
+    // 6. Alarm & Notification Policy: STRICT LEOPARD-ONLY ALARMS
+    // Alarm triggers must respond SOLELY to a verified live camera detection of a leopard.
+    const isLeopard = input.species.toLowerCase() === 'leopard';
+    const shouldTriggerAlarm = isConfirmed && isLeopard && (threatLevel === 'CRITICAL' || (threatLevel === 'HIGH' && zone.protectedArea));
+
+    // Notifications can still be sent for other high-threat items (like unauthorized humans),
+    // but the acoustic siren is reserved for leopards.
+    const shouldNotifyFarmer = isConfirmed && (threatLevel !== 'LOW' || isLeopard);
 
     return {
       threatLevel,

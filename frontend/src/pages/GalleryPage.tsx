@@ -9,6 +9,13 @@ import {
 import { fetchApi } from '../services/api';
 import { Detection, WildlifeSpecies } from '../types/index';
 
+// Import local assets
+import leopard1 from '../assets/leopard_1.jpg';
+import leopard2 from '../assets/leopard_2.jpg';
+import leopard3 from '../assets/leopard_3.jpg';
+import leopard4 from '../assets/leopard_4.jpg';
+import leopard5 from '../assets/leopard_5.jpg';
+
 interface AnimalInfo {
   id: string;
   name: string;
@@ -26,149 +33,203 @@ interface AnimalInfo {
 const animals: AnimalInfo[] = [
   {
     id: '1',
-    name: 'Bengal Tiger',
-    scientificName: 'Panthera tigris tigris',
-    category: 'Big Cats',
+    name: 'African leopard (P. p. pardus)',
+    scientificName: 'Panthera pardus pardus',
+    category: 'Leopard Subspecies',
     threatLevel: 'CRITICAL',
-    description: 'The Bengal tiger is the most numerous tiger subspecies and is native to the Indian subcontinent. It is the national animal of both India and Bangladesh.',
-    habitat: 'Tropical rainforests, marshes, and tall grasses.',
-    population: 'Approximately 2,500 - 3,000 in the wild.',
-    funFact: 'Each tiger has a completely unique pattern of stripes, much like human fingerprints.',
-    imageUrl: 'https://images.unsplash.com/photo-1561731216-c3a4d99437d5?auto=format&fit=crop&q=80&w=800',
-    tags: ['Endangered', 'Apex Predator', 'Solitary']
+    description: 'It is the most widespread leopard subspecies and is native to most of Sub-Saharan Africa. The leopard (Panthera pardus) has a pale yellowish to dark golden fur with dark spots grouped in rosettes.',
+    habitat: 'Sub-Saharan Africa, rainforest to steppe.',
+    population: 'Declining / Vulnerable',
+    funFact: 'First described by Carl Linnaeus in 1758.',
+    imageUrl: leopard1,
+    tags: ['Widespread', 'Sub-Saharan', 'Panthera']
   },
   {
     id: '2',
-    name: 'Indian Leopard',
+    name: 'Indian leopard (P. p. fusca)',
     scientificName: 'Panthera pardus fusca',
-    category: 'Big Cats',
+    category: 'Leopard Subspecies',
     threatLevel: 'HIGH',
-    description: 'A highly adaptable predator found across the Indian subcontinent. Known for its stealth and ability to thrive near human settlements.',
-    habitat: 'Diverse, ranging from rainforests to arid landscapes and farm boundaries.',
-    population: 'Estimated 12,000 - 14,000 in India.',
-    funFact: 'Leopards are excellent swimmers and are known to spend much of their day resting in trees.',
-    imageUrl: 'https://images.unsplash.com/photo-1575550959106-5a7defe28b56?auto=format&fit=crop&q=80&w=800',
-    tags: ['Stealthy', 'Nocturnal', 'Adaptable']
+    description: 'It occurs in the Indian subcontinent, Myanmar and southern Tibet. It relies on its spotted pattern for camouflage as it stalks and ambushes its prey.',
+    habitat: 'Indian subcontinent, forests, and agricultural borders.',
+    population: 'Listed as Near Threatened.',
+    funFact: 'Thrives in diverse environments ranging from forests to near human settlements.',
+    imageUrl: leopard2,
+    tags: ['Indian Subcontinent', 'Stealthy', 'Near Threatened']
   },
   {
     id: '3',
-    name: 'Indian Elephant',
-    scientificName: 'Elephas maximus indicus',
-    category: 'Megaherbivores',
-    threatLevel: 'HIGH',
-    description: 'The largest land animal in Asia, the Indian elephant is a keystone species that plays a vital role in its ecosystem.',
-    habitat: 'Grasslands, dry deciduous forests, and wet tropical forests.',
-    population: 'Estimated 20,000 - 25,000.',
-    funFact: 'Elephants communicate through infrasound, which can travel miles through the ground.',
-    imageUrl: 'https://images.unsplash.com/photo-1581081859572-473acc27d422?auto=format&fit=crop&q=80&w=800',
-    tags: ['Keystone Species', 'Social', 'Herbivore']
+    name: 'Javan leopard (P. p. melas)',
+    scientificName: 'Panthera pardus melas',
+    category: 'Leopard Subspecies',
+    threatLevel: 'CRITICAL',
+    description: 'It is native to Java in Indonesia. It inhabits dense tropical rainforests and dry deciduous forests.',
+    habitat: 'Java, Indonesia.',
+    population: 'Assessed as Endangered.',
+    funFact: 'Exhibits high frequency of melanism (black panthers).',
+    imageUrl: leopard3,
+    tags: ['Java', 'Endangered', 'Tropical Rainforest']
   },
   {
     id: '4',
-    name: 'Indian Rhinoceros',
-    scientificName: 'Rhinoceros unicornis',
-    category: 'Megaherbivores',
+    name: 'Arabian leopard (P. p. nimr)',
+    scientificName: 'Panthera pardus nimr',
+    category: 'Leopard Subspecies',
     threatLevel: 'CRITICAL',
-    description: 'Also known as the Greater One-Horned Rhino, it is distinguished by a single horn and skin with many folds, resembling armor plates.',
-    habitat: 'Riverine grasslands and adjacent woodlands.',
-    population: 'Over 3,700.',
-    funFact: 'Despite their heavy build, rhinos can run at speeds of up to 34 miles per hour.',
-    imageUrl: 'https://images.unsplash.com/photo-1534199026738-4e8971f11c7d?auto=format&fit=crop&q=80&w=800',
-    tags: ['Vulnerable', 'One-Horned', 'Armor-like Skin']
+    description: 'It is the smallest leopard subspecies and considered endemic to the Arabian Peninsula. Extremely fragmented population.',
+    habitat: 'Arabian Peninsula, arid and montane areas.',
+    population: 'Estimated 100–120 individuals in Oman and Yemen.',
+    funFact: 'The smallest recognized subspecies of leopard.',
+    imageUrl: leopard4,
+    tags: ['Arabian Peninsula', 'Critically Endangered', 'Smallest']
   },
   {
     id: '5',
-    name: 'Wild Boar',
-    scientificName: 'Sus scrofa',
-    category: 'Suids',
-    threatLevel: 'MODERATE',
-    description: 'A bulky, massive-bodied suid with relatively short and thin legs. They are highly intelligent and often cause significant crop damage.',
-    habitat: 'Woodlands, farmland, and scrub areas.',
-    population: 'Abundant / Least Concern.',
-    funFact: 'Wild boars have an incredible sense of smell, so much so that they are used to detect truffles.',
-    imageUrl: 'https://images.unsplash.com/photo-1590506305942-0f0e0e987489?auto=format&fit=crop&q=80&w=800',
-    tags: ['Omnivore', 'Intelligent', 'Hardy']
+    name: 'Amur leopard (P. p. orientalis)',
+    scientificName: 'Panthera pardus orientalis',
+    category: 'Leopard Subspecies',
+    threatLevel: 'CRITICAL',
+    description: 'It is native to the Russian Far East and northern China, adapted to temperate coniferous forests where winter temperatures reach low levels.',
+    habitat: 'Russian Far East and Northern China.',
+    population: 'Critically Endangered.',
+    funFact: 'Grows thick, beautiful fur to survive freezing winter conditions.',
+    imageUrl: leopard5,
+    tags: ['Russian Far East', 'Coniferous Forests', 'Cold Adapted']
   },
   {
     id: '6',
-    name: 'Snow Leopard',
-    scientificName: 'Panthera uncia',
-    category: 'Big Cats',
+    name: 'Indochinese leopard (P. p. delacouri)',
+    scientificName: 'Panthera pardus delacouri',
+    category: 'Leopard Subspecies',
     threatLevel: 'CRITICAL',
-    description: 'Known as the "Ghost of the Mountains," these elusive cats are adapted to the cold, high-altitude mountains of Central Asia.',
-    habitat: 'Alpine and subalpine zones at elevations of 3,000 to 4,500 meters.',
-    population: 'Estimated 450 - 500 in India.',
-    funFact: 'Snow leopards cannot roar; instead, they hiss, growl, and puff.',
-    imageUrl: 'https://images.unsplash.com/photo-1546182990-dffeafbe841d?auto=format&fit=crop&q=80&w=800',
-    tags: ['Rare', 'High Altitude', 'Ghostly']
+    description: 'Native to mainland Southeast Asia and southern China. It has become increasingly rare due to habitat loss and poaching.',
+    habitat: 'Southeast Asia, Southern China.',
+    population: 'Critically Endangered / Endangered.',
+    funFact: 'Often found in tropical rain forests and dry evergreen forests.',
+    imageUrl: 'https://images.unsplash.com/photo-1621768406798-e7d3839634e9?auto=format&fit=crop&w=800&q=80',
+    tags: ['Southeast Asia', 'Rainforest', 'Rare']
   },
   {
     id: '7',
-    name: 'Sloth Bear',
-    scientificName: 'Melursus ursinus',
-    category: 'Bears',
+    name: 'Sri Lankan leopard (P. p. kotiya)',
+    scientificName: 'Panthera pardus kotiya',
+    category: 'Leopard Subspecies',
     threatLevel: 'HIGH',
-    description: 'A lanky, shaggy bear species native to the Indian subcontinent. They feed primarily on termites and ants.',
-    habitat: 'Dry and moist forests, often in rocky areas.',
-    population: 'Estimated 6,000 - 11,000.',
-    funFact: 'Sloth bears have no front upper incisors, which allows them to suck up termites easily.',
-    imageUrl: 'https://images.unsplash.com/photo-1589656966895-2f33e7653819?auto=format&fit=crop&q=80&w=800',
-    tags: ['Insectivore', 'Shaggy', 'Aggressive']
+    description: 'A leopard subspecies native to Sri Lanka. It is the island\'s top predator, as there are no other big cat species there.',
+    habitat: 'Sri Lanka, various habitats including dry evergreen monsoon forests.',
+    population: 'Endangered.',
+    funFact: 'Being the apex predator, they are less nocturnal than other leopards.',
+    imageUrl: 'https://images.unsplash.com/photo-1507666405821-432ffb1670ae?auto=format&fit=crop&w=800&q=80',
+    tags: ['Sri Lanka', 'Apex Predator', 'Endemic']
   },
   {
     id: '8',
-    name: 'Gaur (Indian Bison)',
-    scientificName: 'Bos gaurus',
-    category: 'Bovines',
-    threatLevel: 'MODERATE',
-    description: 'The largest extant bovine, the Gaur is a massive, muscular animal found in South and Southeast Asia.',
-    habitat: 'Evergreen, semi-evergreen, and moist deciduous forests.',
-    population: 'Estimated 13,000 - 30,000.',
-    funFact: 'Gaurs have a distinct dorsal ridge on their back and white "stockings" on their legs.',
-    imageUrl: 'https://images.unsplash.com/photo-1535941339077-2dd1c79b3df8?auto=format&fit=crop&q=80&w=800',
-    tags: ['Massive', 'Herbivore', 'Social']
+    name: 'Persian leopard (P. p. tulliana)',
+    scientificName: 'Panthera pardus tulliana',
+    category: 'Leopard Subspecies',
+    threatLevel: 'CRITICAL',
+    description: 'Also known as the Caucasian leopard, it is native to the Iranian Plateau and surrounding regions. It is the largest leopard subspecies.',
+    habitat: 'Iran, Caucasus, Turkey, Turkmenistan.',
+    population: 'Endangered.',
+    funFact: 'The largest subspecies of leopard.',
+    imageUrl: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=800&q=80',
+    tags: ['Largest', 'Middle East', 'Caucasus']
+  },
+  {
+    id: '9',
+    name: 'North-Chinese Leopard',
+    scientificName: 'Panthera pardus japonensis',
+    category: 'Leopard Subspecies',
+    threatLevel: 'CRITICAL',
+    description: 'Native to northern China. It is roughly the same size as the Amur leopard, but its coat is darker and more yellowish.',
+    habitat: 'Northern China, forests and mountains.',
+    population: 'Estimated fewer than 2,500 mature individuals.',
+    funFact: 'First described in 1862 by Gray.',
+    imageUrl: 'https://images.unsplash.com/photo-1614027164847-1b280143299c?auto=format&fit=crop&q=80&w=800',
+    tags: ['North China', 'Rare', 'Mountain Habitat']
+  },
+  {
+    id: '10',
+    name: 'Anatolian Leopard',
+    scientificName: 'Panthera pardus tulliana',
+    category: 'Leopard Subspecies',
+    threatLevel: 'CRITICAL',
+    description: 'Native to the Taurus Mountains in Turkey. Long thought extinct, but recent sightings have confirmed their presence.',
+    habitat: 'Taurus Mountains, Turkey.',
+    population: 'Critically Endangered.',
+    funFact: 'Named after the ancient region of Anatolia.',
+    imageUrl: 'https://images.unsplash.com/photo-1621768406798-e7d3839634e9?auto=format&fit=crop&q=80&w=800',
+    tags: ['Turkey', 'Rediscovered', 'Taurus Mountains']
   }
 ];
-
-type GalleryTab = 'ENCYCLOPEDIA' | 'LIVE_SIGHTINGS' | 'MEDIA_LIBRARY';
 
 export const GalleryPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAnimal, setSelectedAnimal] = useState<AnimalInfo | null>(null);
-  const [activeTab, setActiveTab] = useState<GalleryTab>('ENCYCLOPEDIA');
-  const [recentDetections, setRecentDetections] = useState<Detection[]>([]);
+  const [activeTab, setActiveTab] = useState<'ALL_SPECIES' | 'LIVE_SIGHTINGS' | 'MEDIA_LIBRARY'>('ALL_SPECIES');
   const [loading, setLoading] = useState(false);
+  const [recentDetections, setRecentDetections] = useState<Detection[]>([]);
+  const [mediaArchive, setMediaArchive] = useState<any[]>([
+    {
+      id: 'm1',
+      type: 'image',
+      url: 'https://images.unsplash.com/photo-1615963244664-5b84436ba15e?auto=format&fit=crop&w=800&q=80',
+      filename: 'LEOPARD_DET_001.JPG',
+      sector: 'North Perimeter',
+      species: 'Leopard'
+    },
+    {
+      id: 'm2',
+      type: 'image',
+      url: 'https://images.unsplash.com/photo-1575550959106-5a7defe28b56?auto=format&fit=crop&w=800&q=80',
+      filename: 'LEOPARD_DET_002.JPG',
+      sector: 'East Sector',
+      species: 'Leopard'
+    },
+    {
+      id: 'm3',
+      type: 'image',
+      url: leopard3,
+      filename: 'LEOPARD_DET_003.JPG',
+      sector: 'West Buffer',
+      species: 'Leopard'
+    },
+    {
+      id: 'm4',
+      type: 'image',
+      url: leopard4,
+      filename: 'LEOPARD_DET_004.JPG',
+      sector: 'Central Homestead',
+      species: 'Leopard'
+    },
+    {
+      id: 'm5',
+      type: 'image',
+      url: leopard5,
+      filename: 'EXT_LEOPARD_01.JPG',
+      sector: 'South Boundary',
+      species: 'Leopard'
+    },
+    {
+      id: 'm6',
+      type: 'image',
+      url: leopard1,
+      filename: 'EXT_LEOPARD_02.JPG',
+      sector: 'River Trail',
+      species: 'Leopard'
+    }
+  ]);
 
   useEffect(() => {
     if (activeTab === 'LIVE_SIGHTINGS') {
-      fetchDetections();
+      setLoading(true);
+      fetchApi<{ success: boolean; incidents: any[] }>('/incidents?limit=10')
+        .then(res => {
+          if (res.success) setRecentDetections(res.incidents);
+        })
+        .finally(() => setLoading(false));
     }
   }, [activeTab]);
-
-  const fetchDetections = async () => {
-    setLoading(true);
-    try {
-      const res = await fetchApi<{ success: boolean; detections: Detection[] }>('/detections?limit=20');
-      if (res.success) setRecentDetections(res.detections);
-    } catch (err) {
-      console.error('Failed to fetch detections:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const mediaArchive = useMemo(() => {
-    // Generate some interesting looking placeholder media for the library
-    return Array.from({ length: 12 }).map((_, i) => ({
-      id: `media-${i}`,
-      type: i % 3 === 0 ? 'video' : 'image',
-      url: `https://images.unsplash.com/photo-1${500000000000 + (i * 123456)}?auto=format&fit=crop&q=80&w=800`,
-      timestamp: new Date(Date.now() - (i * 1000 * 60 * 60 * 2)).toISOString(),
-      sector: `Sector ${0 + (i % 4)}`,
-      filename: `HW_NODE_RECORD_${1000 + i}`,
-      species: ['leopard', 'tiger', 'elephant', 'wild_boar', 'deer'][i % 5]
-    }));
-  }, []);
 
   const filteredAnimals = useMemo(() =>
     animals.filter(animal =>
@@ -188,68 +249,63 @@ export const GalleryPage: React.FC = () => {
           <div className="max-w-2xl space-y-6">
             <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest">
               <Zap className="w-3 h-3" />
-              <span>Real-time Wildlife Intelligence</span>
+              <span>Panthera Pardus Intelligence Hub</span>
             </div>
             <h1 className="text-5xl lg:text-6xl font-black text-white tracking-tight leading-none">
-              Species <span className="text-emerald-500">Guardian</span> <br/>
-              <span className="text-slate-500">Intelligence Hub</span>
+              Leopard <span className="text-emerald-500">Encyclopedia</span> <br/>
+              <span className="text-slate-500">Species Archive</span>
             </h1>
             <p className="text-slate-400 text-lg leading-relaxed max-w-xl">
-              Advanced neural-network powered identification system and global wildlife archive.
-              Bridging the gap between human agricultural zones and wild ecosystems.
+              Advanced neural-network powered identification system and global leopard archive.
+              Bridging the gap between human agricultural zones and apex predator habitats.
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-4 w-full lg:w-72">
             <div className="bg-slate-950/50 border border-slate-800 p-4 rounded-3xl backdrop-blur-md">
-              <div className="text-[10px] font-black text-slate-500 uppercase mb-1">Total Species</div>
-              <div className="text-2xl font-black text-white">428</div>
+              <div className="text-[10px] font-black text-slate-500 uppercase mb-1">Subspecies</div>
+              <div className="text-2xl font-black text-white">08</div>
             </div>
             <div className="bg-slate-950/50 border border-slate-800 p-4 rounded-3xl backdrop-blur-md">
-              <div className="text-[10px] font-black text-slate-500 uppercase mb-1">Live Sightings</div>
-              <div className="text-2xl font-black text-emerald-500">24h+</div>
+              <div className="text-[10px] font-black text-slate-500 uppercase mb-1">Threat Status</div>
+              <div className="text-2xl font-black text-rose-500">CRITICAL</div>
             </div>
             <div className="bg-slate-950/50 border border-slate-800 p-4 rounded-3xl backdrop-blur-md col-span-2">
-              <div className="text-[10px] font-black text-slate-500 uppercase mb-1">AI Confidence Avg</div>
-              <div className="text-2xl font-black text-cyan-400">94.2%</div>
+              <div className="text-[10px] font-black text-slate-500 uppercase mb-1">Detection Logic</div>
+              <div className="text-2xl font-black text-cyan-400">MORPHOLOGICAL</div>
             </div>
           </div>
-        </div>
-
-        {/* 2. TAB NAVIGATION */}
-        <div className="flex bg-slate-950/80 p-1.5 rounded-2xl border border-slate-800 mt-12 w-fit">
-          {[
-            { id: 'ENCYCLOPEDIA', label: 'Encyclopedia', icon: Globe },
-            { id: 'LIVE_SIGHTINGS', label: 'Live Sightings', icon: Activity },
-            { id: 'MEDIA_LIBRARY', label: 'Captured Media', icon: ImageIcon }
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as GalleryTab)}
-              className={`flex items-center space-x-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
-                activeTab === tab.id
-                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/20'
-                : 'text-slate-500 hover:text-slate-300'
-              }`}
-            >
-              <tab.icon className="w-3.5 h-3.5" />
-              <span>{tab.label}</span>
-            </button>
-          ))}
         </div>
       </div>
 
       {/* 3. DYNAMIC SEARCH & FILTER */}
       <div className="flex flex-col md:flex-row gap-4 items-center">
+        <div className="flex bg-slate-900 border border-slate-800 rounded-3xl p-1.5 w-full md:w-auto">
+          {[
+            { id: 'ALL_SPECIES', label: 'Encyclopedia', icon: Leaf },
+            { id: 'LIVE_SIGHTINGS', label: 'Sightings', icon: Camera },
+            { id: 'MEDIA_LIBRARY', label: 'Media', icon: ImageIcon }
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`flex items-center space-x-2 px-6 py-3 rounded-2xl text-xs font-black uppercase transition-all ${
+                activeTab === tab.id
+                  ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/20'
+                  : 'text-slate-500 hover:text-white hover:bg-slate-800'
+              }`}
+            >
+              <tab.icon className="w-4 h-4" />
+              <span>{tab.label}</span>
+            </button>
+          ))}
+        </div>
+
         <div className="relative flex-1 group w-full">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-emerald-500 transition-colors" />
           <input
             type="text"
-            placeholder={
-              activeTab === 'ENCYCLOPEDIA' ? "Search species, habitats, or categories..." :
-              activeTab === 'LIVE_SIGHTINGS' ? "Search by camera, species, or location..." :
-              "Search snapshots and recordings..."
-            }
+            placeholder="Search leopard subspecies, habitats, or regions..."
             className="w-full bg-slate-900 border border-slate-800 rounded-3xl pl-12 pr-4 py-4 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all shadow-xl shadow-black/20"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -260,19 +316,11 @@ export const GalleryPage: React.FC = () => {
             <Filter className="w-4 h-4" />
             <span className="text-sm font-bold">Filter</span>
           </button>
-          {activeTab === 'LIVE_SIGHTINGS' && (
-            <button
-              onClick={fetchDetections}
-              className="p-4 bg-emerald-600/10 border border-emerald-500/20 text-emerald-400 rounded-3xl hover:bg-emerald-600/20 transition-all"
-            >
-              <RefreshCw className="w-5 h-5" />
-            </button>
-          )}
         </div>
       </div>
 
       {/* 4. CONTENT RENDERING */}
-      {activeTab === 'ENCYCLOPEDIA' && (
+      {activeTab === 'ALL_SPECIES' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredAnimals.map((animal) => (
             <div
@@ -289,7 +337,7 @@ export const GalleryPage: React.FC = () => {
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent opacity-80" />
 
                 <div className="absolute top-4 left-4 flex flex-col space-y-2">
-                   <span className={`px-2.5 py-1 rounded-lg text-[8px] font-black uppercase tracking-tighter backdrop-blur-md border ${
+                  <span className={`px-2.5 py-1 rounded-lg text-[8px] font-black uppercase tracking-tighter backdrop-blur-md border ${
                     animal.threatLevel === 'CRITICAL' ? 'bg-rose-500/20 text-rose-400 border-rose-500/30' :
                     animal.threatLevel === 'HIGH' ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' :
                     'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
@@ -324,11 +372,11 @@ export const GalleryPage: React.FC = () => {
             </div>
           ) : recentDetections.length > 0 ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {recentDetections.map((det) => (
+              {recentDetections.map((det: any) => (
                 <div key={det.id} className="bg-slate-900 border border-slate-800 rounded-[2.5rem] overflow-hidden flex flex-col sm:flex-row p-4 gap-6 group hover:border-emerald-500/30 transition-all">
                   <div className="w-full sm:w-48 h-48 rounded-2xl overflow-hidden bg-black relative flex-shrink-0">
-                    {det.frameImageUrl ? (
-                      <img src={det.frameImageUrl} className="w-full h-full object-cover" alt="Detection" />
+                    {(det.frameImageUrl || det.snapshotUrl) ? (
+                      <img src={det.frameImageUrl || det.snapshotUrl} className="w-full h-full object-cover" alt="Detection" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-slate-800">
                         <Camera className="w-12 h-12 text-slate-700" />

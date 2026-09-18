@@ -19,8 +19,7 @@ interface AuthContextType {
   login: (email: string, pass: string) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
-  register: (email: string, pass: string, name: string, farmName: string, phone: string) => Promise<void>;
-  switchRole: (newRole: UserRole) => Promise<void>;
+  register: (email: string, pass: string, name: string, farmName: string, phone: string, farmId: string, systemId: string) => Promise<void>;
   canAdmin: boolean;
   canOperate: boolean;
   isViewerOnly: boolean;
@@ -30,7 +29,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [role, setRole] = useState<UserRole>('VIEWER');
+  const role: UserRole = 'FARMER';
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -40,7 +39,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const offlineUser = JSON.parse(offlineUserStr) as User;
         setUser(offlineUser);
-        setRole(offlineUser.role);
         setLoading(false);
       } catch (e) {
         console.error(e);
@@ -60,23 +58,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (userDoc.exists()) {
           const userData = userDoc.data() as User;
           setUser(userData);
-          setRole(userData.role);
         } else {
           // Fallback if doc doesn't exist yet
           const fallbackUser: User = {
             id: firebaseUser.uid,
-            name: firebaseUser.displayName || 'User',
+            name: firebaseUser.displayName || 'Farmer',
             email: firebaseUser.email || '',
-            role: 'VIEWER',
+            role: 'FARMER',
             phone: '',
-            farmName: ''
+            farmName: '',
+            farmId: `FARM-${Math.floor(Math.random() * 10000)}`,
+            systemId: `WG-${Math.floor(Math.random() * 1000000)}`
           };
           setUser(fallbackUser);
-          setRole('VIEWER');
         }
       } else {
         setUser(null);
-        setRole('VIEWER');
       }
       setLoading(false);
     });
@@ -89,19 +86,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await signInWithEmailAndPassword(auth, email, pass);
     } catch (error: any) {
       console.warn("Firebase authentication failed, attempting Advanced LocalStorage/Offline fallback:", error);
-      // Premium offline fallback bypass for Viva/Testing environments or missing authorized domains
+      // Premium offline fallback bypass for Viva/Testing environments
       if (email === "admin@wildguard.ai" && pass === "admin123") {
         const localUser: User = {
-          id: "offline-admin-id",
-          name: "Krishna Kumar (Offline Admin)",
+          id: "offline-farmer-id",
+          name: "Krishna Kumar (Farmer Node)",
           email: "admin@wildguard.ai",
-          role: "ADMIN",
+          role: "FARMER",
           phone: "+91 98765 43210",
-          farmName: "WildGuard AI Smart Farm"
+          farmName: "WildGuard AI Smart Farm",
+          farmId: "FARM-HQ-001",
+          systemId: "WG-LOCAL-001"
         };
         localStorage.setItem("wildguard_offline_user", JSON.stringify(localUser));
         setUser(localUser);
-        setRole("ADMIN");
         return;
       } else if (email && pass.length >= 6) {
         // Dynamic Local Storage registration/login fallback
@@ -110,7 +108,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const localUser = savedUsers[email].user;
           localStorage.setItem("wildguard_offline_user", JSON.stringify(localUser));
           setUser(localUser);
-          setRole(localUser.role);
           return;
         } else if (!savedUsers[email]) {
           // Auto-provision account if first time to prevent roadblock
@@ -120,13 +117,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             email: email,
             role: "FARMER",
             phone: "+91 99999 99999",
-            farmName: "Sentinel Farm Node"
+            farmName: "Sentinel Farm Node",
+            farmId: `FARM-${Math.floor(Math.random() * 10000)}`,
+            systemId: `WG-${Math.floor(Math.random() * 1000000)}`
           };
           savedUsers[email] = { password: pass, user: localUser };
           localStorage.setItem("wildguard_local_users", JSON.stringify(savedUsers));
           localStorage.setItem("wildguard_offline_user", JSON.stringify(localUser));
           setUser(localUser);
-          setRole("FARMER");
           return;
         }
       }
@@ -137,44 +135,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const loginWithGoogle = async () => {
     try {
       const provider = new GoogleAuthProvider();
-      // Use popup for sign-in
       const res = await signInWithPopup(auth, provider);
 
-      // Check if user exists in Firestore
       const userDoc = await getDoc(doc(db, 'users', res.user.uid));
       if (!userDoc.exists()) {
         const newUser: User = {
           id: res.user.uid,
           name: res.user.displayName || 'Google User',
           email: res.user.email || '',
-          role: 'FARMER', // Default to Farmer for new Google signups
+          role: 'FARMER',
           phone: '',
-          farmName: ''
+          farmName: '',
+          farmId: `FARM-${Math.floor(Math.random() * 10000)}`,
+          systemId: `WG-${Math.floor(Math.random() * 1000000)}`
         };
         await setDoc(doc(db, 'users', res.user.uid), newUser);
         setUser(newUser);
-        setRole('FARMER');
       } else {
         const userData = userDoc.data() as User;
         setUser(userData);
-        setRole(userData.role);
       }
     } catch (error: any) {
-      console.warn("Google Authentication failed or API key invalid. Launching Premium Smart-Bypass Autonomous Session:", error);
+      console.warn("Google Authentication failed. Launching Local session:", error);
 
-      // Advanced automatic fallback matching user specification to ensure it "always works" perfectly
       const fallbackGoogleUser: User = {
         id: `google-mock-${Date.now()}`,
-        name: "Krishna Kumar (Google Verified)",
+        name: "Krishna Kumar (Farmer)",
         email: "krishna.kumar@wildguard.ai",
-        role: "ADMIN",
+        role: "FARMER",
         phone: "+91 94470 12345",
-        farmName: "WildGuard AI Headquarters & Smart Sanctuary Belt"
+        farmName: "WildGuard AI Sanctuary Belt",
+        farmId: "FARM-HQ-001",
+        systemId: "WG-GOOGLE-001"
       };
 
       localStorage.setItem("wildguard_offline_user", JSON.stringify(fallbackGoogleUser));
       setUser(fallbackGoogleUser);
-      setRole("ADMIN");
       return;
     }
   };
@@ -183,10 +179,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem("wildguard_offline_user");
     await signOut(auth);
     setUser(null);
-    setRole("VIEWER");
   };
 
-  const register = async (email: string, pass: string, name: string, farmName: string, phone: string) => {
+  const register = async (email: string, pass: string, name: string, farmName: string, phone: string, farmId: string, systemId: string) => {
     const res = await createUserWithEmailAndPassword(auth, email, pass);
     const newUser: User = {
       id: res.user.uid,
@@ -194,25 +189,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       email,
       role: 'FARMER',
       phone,
-      farmName
+      farmName,
+      farmId,
+      systemId
     };
     await setDoc(doc(db, 'users', res.user.uid), newUser);
     setUser(newUser);
-    setRole('FARMER');
   };
 
-  const switchRole = async (newRole: UserRole) => {
-    if (user) {
-      const updatedUser = { ...user, role: newRole };
-      await setDoc(doc(db, 'users', user.id), updatedUser);
-      setUser(updatedUser);
-      setRole(newRole);
-    }
-  };
-
-  const canAdmin = role === 'ADMIN';
-  const canOperate = role === 'ADMIN' || role === 'FARMER';
-  const isViewerOnly = role === 'VIEWER';
+  const canAdmin = true; // Every Farmer is now their own admin
+  const canOperate = true;
+  const isViewerOnly = false;
 
   return (
     <AuthContext.Provider value={{
@@ -223,7 +210,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       loginWithGoogle,
       logout,
       register,
-      switchRole,
       canAdmin,
       canOperate,
       isViewerOnly

@@ -11,103 +11,47 @@ export interface WildlifeInfo {
   imageUrl: string;
   deterrentMethod: string;
   behavior: string;
+  extendedText?: string;
 }
 
 export const wildlifeData: Record<WildlifeSpecies, WildlifeInfo> = {
   leopard: {
     species: 'leopard',
-    commonName: 'Indian Leopard',
-    scientificName: 'Panthera pardus fusca',
-    description: 'A versatile, opportunistic hunter. Highly adaptable to human-dominated landscapes.',
+    commonName: 'Leopard',
+    scientificName: 'Panthera pardus',
+    description: 'The leopard (Panthera pardus) is a member of the genus Panthera and the smallest of the big cats. It is distinguished by its golden fur and dark spots arranged in rosettes.',
     threatLevel: 'CRITICAL',
-    dangerScore: 92,
-    habitat: 'Deciduous forests, scrublands, and agricultural borders.',
-    imageUrl: 'https://images.unsplash.com/photo-1575550959106-5a7defe28b56?q=80&w=1000&auto=format&fit=crop',
-    deterrentMethod: 'High-intensity strobe lights (White/Blue) & Ultrasonic predatory frequencies.',
-    behavior: 'Solitary, nocturnal, and extremely stealthy. Known to prey on livestock.'
-  },
-  tiger: {
-    species: 'tiger',
-    commonName: 'Bengal Tiger',
-    scientificName: 'Panthera tigris tigris',
-    description: 'The largest cat species in the world. An apex predator requiring vast territories.',
-    threatLevel: 'CRITICAL',
-    dangerScore: 98,
-    habitat: 'Tropical rainforests, marshes, and tall grass.',
-    imageUrl: 'https://images.unsplash.com/photo-1561731216-c3a4d99739d4?q=80&w=1000&auto=format&fit=crop',
-    deterrentMethod: 'Remote siren activation (120dB) & Human-voice mimicry broadcasting.',
-    behavior: 'Territorial and powerful. Avoids direct human contact unless threatened or old.'
-  },
-  elephant: {
-    species: 'elephant',
-    commonName: 'Asian Elephant',
-    scientificName: 'Elephas maximus',
-    description: 'Highly intelligent and social megaherbivore. Major cause of crop raiding.',
-    threatLevel: 'HIGH',
-    dangerScore: 85,
-    habitat: 'Forests and grasslands near water sources.',
-    imageUrl: 'https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?q=80&w=1000&auto=format&fit=crop',
-    deterrentMethod: 'Low-frequency seismic vibrations & Beehive sound simulation.',
-    behavior: 'Travels in herds. Extremely destructive to infrastructure and crops.'
-  },
-  wild_boar: {
-    species: 'wild_boar',
-    commonName: 'Wild Boar',
-    scientificName: 'Sus scrofa',
-    description: 'Extremely resilient and aggressive when cornered. Rapid breeders.',
-    threatLevel: 'MEDIUM',
-    dangerScore: 65,
-    habitat: 'Diverse, from dense forests to open farmland.',
-    imageUrl: 'https://images.unsplash.com/photo-1552422535-c45813c61732?q=80&w=1000&auto=format&fit=crop',
-    deterrentMethod: 'Flash-bang simulations & Ultrasonic bursts.',
-    behavior: 'Forages in groups (sounders). Can charge humans if they feel threatened.'
-  },
-  deer: {
-    species: 'deer',
-    commonName: 'Spotted Deer (Chital)',
-    scientificName: 'Axis axis',
-    description: 'Graceful herbivore, often seen in large herds.',
-    threatLevel: 'LOW',
-    dangerScore: 15,
-    habitat: 'Open grasslands and thin forests.',
-    imageUrl: 'https://images.unsplash.com/photo-1484406566174-9da000fda645?q=80&w=1000&auto=format&fit=crop',
-    deterrentMethod: 'Soft light pulses & Low-volume scent-based deterrents.',
-    behavior: 'Flight-oriented. Causes crop damage through grazing.'
-  },
-  monkey: {
-    species: 'monkey',
-    commonName: 'Rhesus Macaque',
-    scientificName: 'Macaca mulatta',
-    description: 'Highly opportunistic and accustomed to human presence.',
-    threatLevel: 'MEDIUM',
-    dangerScore: 40,
-    habitat: 'Forests, urban areas, and farmsteads.',
-    imageUrl: 'https://images.unsplash.com/photo-1540573133985-87b6da6d54a9?q=80&w=1000&auto=format&fit=crop',
-    deterrentMethod: 'Predator-eye visual patterns & High-pitch distress calls.',
-    behavior: 'Agile and raiding-oriented. Can be aggressive in groups.'
+    dangerScore: 95,
+    habitat: 'Diverse habitats ranging from rainforests and savannas to deserts and mountainous regions across Africa and parts of Asia.',
+    imageUrl: 'https://images.unsplash.com/photo-1615963244664-5b84436ba15e?auto=format&fit=crop&w=800&q=80',
+    deterrentMethod: 'High-intensity strobe lights (White/Blue) & Modulated 2.4kHz acoustic frequencies.',
+    behavior: 'Highly adaptable, solitary, and nocturnal. Known for its stealth and ability to climb trees even when carrying heavy prey.',
+    extendedText: `The leopard (Panthera pardus) is one of the five extant cat species in the genus Panthera. It is characterized by its slender, muscular body, reaching a length of 92–183 cm (36–72 in) with a 66–102 cm (26–40 in) long tail.
+
+WildGuard AI is specialized exclusively for this apex predator, recognizing its eight distinct subspecies:
+1. African Leopard (P. p. pardus)
+2. Indian Leopard (P. p. fusca)
+3. Javan Leopard (P. p. melas)
+4. Arabian Leopard (P. p. nimr)
+5. Persian Leopard (P. p. tulliana)
+6. Amur Leopard (P. p. orientalis)
+7. Indochinese Leopard (P. p. delacouri)
+8. Sri Lankan Leopard (P. p. kotiya)
+
+Behavior and Ecology: Leopards are solitary and territorial. They are mainly active from dusk till dawn, resting during the day in thickets, rock crevices, or on tree branches. They are exceptional climbers and can run at speeds exceeding 58 km/h (36 mph).
+
+Detection Philosophy: In this specialized system, every predatory signature is evaluated against the Panthera pardus morphological baseline to ensure maximum precision in human-leopard conflict mitigation.`
   },
   human: {
     species: 'human',
-    commonName: 'Intruder / Person',
+    commonName: 'Human (Co-occurrence Detection)',
     scientificName: 'Homo sapiens',
-    description: 'Unauthorized human entry into protected agricultural zones.',
-    threatLevel: 'HIGH',
-    dangerScore: 70,
-    habitat: 'Global.',
-    imageUrl: 'https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d?q=80&w=1000&auto=format&fit=crop',
-    deterrentMethod: 'Public Address (PA) warning & Floodlight activation.',
-    behavior: 'Varies; potential for theft, vandalism, or poaching.'
-  },
-  unknown: {
-    species: 'unknown',
-    commonName: 'Unidentified Biological Entity',
-    scientificName: 'Unknown',
-    description: 'Motion detected but species classification below confidence threshold.',
+    description: 'Human presence detected within the monitoring zone. When detected alongside a leopard, threat levels are immediately escalated.',
     threatLevel: 'LOW',
-    dangerScore: 0,
-    habitat: 'Unknown.',
-    imageUrl: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?q=80&w=1000&auto=format&fit=crop',
-    deterrentMethod: 'Monitoring Only.',
-    behavior: 'Unknown.'
+    dangerScore: 10,
+    habitat: 'Agricultural settlements and forest border zones.',
+    imageUrl: 'https://images.unsplash.com/photo-1575550959106-5a7defe28b56?auto=format&fit=crop&w=800&q=80',
+    deterrentMethod: 'No deterrent; triggers safety notifications to personnel.',
+    behavior: 'Typically agricultural workers or forest residents.'
   }
 };

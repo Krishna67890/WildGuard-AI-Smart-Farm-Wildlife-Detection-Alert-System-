@@ -118,13 +118,9 @@ export const IncidentHistoryPage: React.FC<IncidentHistoryPageProps> = ({
             onChange={(e) => setFilterSpecies(e.target.value)}
             className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
           >
-            <option value="ALL">All Wildlife Species</option>
+            <option value="ALL">All Target Categories</option>
             <option value="leopard">Leopard</option>
-            <option value="tiger">Tiger</option>
-            <option value="elephant">Elephant</option>
-            <option value="wild_boar">Wild Boar</option>
-            <option value="deer">Deer</option>
-            <option value="monkey">Monkey</option>
+            <option value="human">Human</option>
           </select>
         </div>
 
@@ -176,9 +172,9 @@ export const IncidentHistoryPage: React.FC<IncidentHistoryPageProps> = ({
           </div>
         </div>
         <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
-          <div className="text-[10px] font-black text-slate-500 uppercase mb-1">Herbivore Frequency</div>
+          <div className="text-[10px] font-black text-slate-500 uppercase mb-1">Human Intrusion Frequency</div>
           <div className="text-xl font-black text-emerald-500">
-            {incidents.filter(i => ['deer', 'monkey'].includes(i.species)).length}
+            {incidents.filter(i => i.species === 'human').length}
           </div>
         </div>
         <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl">

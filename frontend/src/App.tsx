@@ -70,7 +70,6 @@ const MainApp: React.FC = () => {
         {currentTab === 'iot' && <DeviceManagementPage />}
         {currentTab === 'cameras' && <CameraManagementPage />}
         {currentTab === 'simulation' && <ExaminerToolbar />}
-        {currentTab === 'settings' && <AdminPanelPage />}
         {currentTab === 'report' && <AcademicReportPage />}
         {currentTab === 'gallery' && <GalleryPage />}
         {currentTab === 'profile' && <ProfilePage />}

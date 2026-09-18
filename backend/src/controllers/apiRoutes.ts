@@ -303,12 +303,8 @@ apiRouter.get('/notifications', (req: Request, res: Response) => {
 apiRouter.get('/analytics', (req: Request, res: Response) => {
   // Aggregate species frequencies
   const speciesCounts: Record<string, number> = {
-    leopard: 18,
-    tiger: 6,
-    elephant: 24,
-    wild_boar: 58,
-    deer: 42,
-    monkey: 35
+    leopard: 183,
+    human: 12
   };
 
   // Threat level distribution
@@ -322,17 +318,17 @@ apiRouter.get('/analytics', (req: Request, res: Response) => {
   // Hourly distribution (24-hour cycle)
   const hourlyActivity = [
     { hour: '00:00', incidents: 8, species: 'Leopard' },
-    { hour: '02:00', incidents: 14, species: 'Tiger/Boar' },
-    { hour: '04:00', incidents: 11, species: 'Elephant' },
-    { hour: '06:00', incidents: 3, species: 'Deer' },
-    { hour: '08:00', incidents: 2, species: 'Monkey' },
-    { hour: '10:00', incidents: 4, species: 'Monkey' },
-    { hour: '12:00', incidents: 1, species: 'Deer' },
-    { hour: '14:00', incidents: 2, species: 'Deer' },
-    { hour: '16:00', incidents: 5, species: 'Wild Boar' },
-    { hour: '18:00', incidents: 12, species: 'Wild Boar' },
-    { hour: '20:00', incidents: 21, species: 'Leopard/Elephant' },
-    { hour: '22:00', incidents: 19, species: 'Leopard/Boar' },
+    { hour: '02:00', incidents: 14, species: 'Leopard' },
+    { hour: '04:00', incidents: 11, species: 'Leopard' },
+    { hour: '06:00', incidents: 3, species: 'Leopard' },
+    { hour: '08:00', incidents: 2, species: 'Leopard' },
+    { hour: '10:00', incidents: 4, species: 'Leopard' },
+    { hour: '12:00', incidents: 1, species: 'Leopard' },
+    { hour: '14:00', incidents: 2, species: 'Leopard' },
+    { hour: '16:00', incidents: 5, species: 'Leopard' },
+    { hour: '18:00', incidents: 12, species: 'Leopard' },
+    { hour: '20:00', incidents: 21, species: 'Leopard' },
+    { hour: '22:00', incidents: 19, species: 'Leopard' },
   ];
 
   // Weekly trend
@@ -350,11 +346,11 @@ apiRouter.get('/analytics', (req: Request, res: Response) => {
   const aiGeneratedInsight = {
     generatedAt: new Date().toISOString(),
     engine: 'WildGuard Threat Intelligence Engine (v2.4)',
-    summary: 'Most wildlife activity occurred between 19:00 and 02:00 this week, with the North Forest Perimeter recording the highest number of confirmed apex predator incidents (Leopard & Tiger). Temporal analysis indicates wild boars preferentially target East Crop sugarcane plots at dusk (18:00–20:00).',
+    summary: 'Most leopard activity occurred between 19:00 and 02:00 this week, with the North Forest Perimeter recording the highest number of confirmed Panthera pardus incidents. Temporal analysis indicates leopards preferentially traverse the North-East corridors during pre-dawn hours (03:00–05:00).',
     recommendations: [
       'Reinforce acoustic buzzer frequency on CAM-01 (North Perimeter) between 20:00 and 04:00.',
-      'Deploy solar strobe deterrents along the East boundary canal to repel elephant herds non-violently.',
-      'Maintain farm personnel curfew near Zone 4 (Homestead livestock pens) past 21:00.'
+      'Deploy solar strobe deterrents along the North-East boundary to discourage leopard encroachment.',
+      'Maintain farm personnel curfew near livestock pens past 21:00 due to increased leopard proximity.'
     ]
   };
 

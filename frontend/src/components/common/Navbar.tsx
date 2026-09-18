@@ -27,7 +27,6 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
     { id: 'zones', label: 'Farm Zones', icon: MapPin },
     { id: 'iot', label: 'IoT Hardware', icon: Cpu },
     { id: 'simulation', label: 'Examiner Demo', icon: ShieldAlert, highlight: true },
-    { id: 'settings', label: 'Admin & Engine', icon: Settings },
     { id: 'report', label: 'Academic Thesis', icon: FileText },
   ];
 
@@ -109,21 +108,11 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
               {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
             </button>
 
-            {/* Role Switcher Pill (Admin / Farmer / Viewer) */}
+            {/* Role Switcher Pill (Farmer Only Architecture) */}
             <div className="flex items-center bg-slate-950 border border-slate-800 rounded-lg p-0.5 text-[11px]">
-              {(['FARMER', 'ADMIN', 'VIEWER'] as UserRole[]).map(r => (
-                <button
-                  key={r}
-                  onClick={() => switchRole(r)}
-                  className={`px-2 py-1 rounded-md font-medium transition-all ${
-                    role === r 
-                      ? 'bg-emerald-600 text-white shadow-sm' 
-                      : 'text-slate-400 hover:text-slate-200'
-                  }`}
-                >
-                  {r === 'FARMER' ? 'Farmer' : r === 'ADMIN' ? 'Admin' : 'Viewer'}
-                </button>
-              ))}
+              <span className="px-3 py-1 rounded-md font-bold bg-emerald-600 text-white shadow-sm">
+                Farmer Node Auth
+              </span>
             </div>
 
             {/* Profile Button */}

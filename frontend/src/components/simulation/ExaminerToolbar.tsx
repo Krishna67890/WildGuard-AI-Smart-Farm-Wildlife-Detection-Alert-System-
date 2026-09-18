@@ -15,46 +15,46 @@ export const ExaminerToolbar: React.FC = () => {
     {
       id: 'leopard',
       label: 'Simulate Leopard',
-      subtitle: 'Apex predator near perimeter',
+      subtitle: 'Panthera pardus near perimeter',
       threat: 'CRITICAL',
       color: 'from-red-600 to-rose-700',
       description: 'Triggers 95% confident Leopard detection in Zone 1. Activates siren and critical emergency modal.'
     },
     {
-      id: 'wild_boar',
-      label: 'Simulate Wild Boar',
-      subtitle: 'Crop raiding sounder (4 animals)',
+      id: 'leopard_group',
+      label: 'Simulate Leopard Group',
+      subtitle: 'Social group / mating pair',
       threat: 'HIGH',
       color: 'from-amber-600 to-orange-700',
-      description: 'Triggers Wild Boar sounder approaching East maize cultivation belt. Elevates high threat advisory.'
+      description: 'Triggers multiple leopard detection approaching East cultivation belt. Elevates high threat advisory.'
     },
     {
-      id: 'elephant',
-      label: 'Simulate Elephant',
-      subtitle: 'Elephant herd at boundary',
+      id: 'leopard_stationary',
+      label: 'Simulate Lying Leopard',
+      subtitle: 'Static leopard at boundary',
       threat: 'CRITICAL',
       color: 'from-purple-600 to-indigo-700',
-      description: 'Triggers Elephant presence with high boundary impact score. Alerts forest range personnel.'
+      description: 'Triggers leopard presence with high dwell time score. Alerts forest range personnel.'
     },
     {
-      id: 'human_wildlife',
-      label: 'Simulate Human + Wildlife',
+      id: 'human_risk',
+      label: 'Simulate Human + Leopard',
       subtitle: 'Co-occurrence danger scenario',
       threat: 'CRITICAL',
       color: 'from-rose-700 to-red-900',
-      description: 'Simulates Tiger & Human simultaneously detected within 8 meters. Immediately trips failsafe emergency.'
+      description: 'Simulates Leopard & Human simultaneously detected within 8 meters. Immediately trips failsafe emergency.'
     },
     {
-      id: 'low_threat',
-      label: 'Simulate Low Threat',
-      subtitle: 'Deer grazing outside danger zone',
+      id: 'leopard_cub',
+      label: 'Simulate Leopard Cub',
+      subtitle: 'Cub foraging outside danger zone',
       threat: 'LOW',
       color: 'from-emerald-600 to-teal-700',
-      description: 'Demonstrates false-alarm suppression: deer grazing peacefully does not trigger acoustic alarms.'
+      description: 'Demonstrates threat scoring: single cub at safe distance does not trigger immediate acoustic alarms.'
     },
     {
       id: 'critical_threat',
-      label: 'Simulate Critical Threat',
+      label: 'Simulate Critical Breach',
       subtitle: 'Full threat engine escalation',
       threat: 'CRITICAL',
       color: 'from-red-700 to-rose-800',
@@ -227,7 +227,7 @@ export const ExaminerToolbar: React.FC = () => {
               <span>1. Computer Vision</span>
             </div>
             <p className="text-slate-400 text-[11px] leading-relaxed">
-              Bounding box regression, species classification (8 classes), and confidence scoring.
+              Bounding box regression, Panthera pardus subspecies classification, and confidence scoring.
             </p>
           </div>
 

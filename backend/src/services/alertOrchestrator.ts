@@ -26,6 +26,7 @@ export class AlertOrchestrator {
     const incidentNum = (db.incidents.length + 900).toString().padStart(4, '0');
     const incidentId = `INC-2026-${incidentNum}`;
 
+    const isLeopard = detection.species.toLowerCase() === 'leopard';
     const newIncident: Incident = {
       id: incidentId,
       detectionId: detection.id,
@@ -41,15 +42,14 @@ export class AlertOrchestrator {
       timestamp: detection.timestamp,
       durationSeconds: detection.durationSeconds || 0,
       snapshotUrl: detection.frameImageUrl || `/snapshots/sample_${detection.species}.jpg`,
-      alarmStatus: (detection.threatLevel === 'CRITICAL' || detection.threatLevel === 'HIGH') ? 'TRIGGERED' : 'STANDBY',
+      alarmStatus: (isLeopard && (detection.threatLevel === 'CRITICAL' || detection.threatLevel === 'HIGH')) ? 'TRIGGERED' : 'STANDBY',
       notificationStatus: 'PENDING',
       status: 'ACTIVE'
     };
 
-    // Auto-trigger connected IoT alarm if configured
-    if (db.config.autoAlarmOnCritical && (detection.threatLevel === 'CRITICAL' || detection.threatLevel === 'HIGH')) {
+    // Auto-trigger connected IoT alarm if configured AND it's a leopard
+    if (db.config.autoAlarmOnCritical && newIncident.alarmStatus === 'TRIGGERED') {
       iotBridge.triggerAlarm();
-      newIncident.alarmStatus = 'TRIGGERED';
     }
 
     // Persist to store (and Firebase)

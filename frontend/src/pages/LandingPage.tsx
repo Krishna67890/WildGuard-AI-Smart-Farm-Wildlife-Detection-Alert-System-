@@ -138,7 +138,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterApp }) => {
             </div>
             <h3 className="text-base font-bold text-white">AI Computer Vision</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Detects Leopard, Tiger, Elephant, Wild Boar, Deer, Monkey, and Humans with real-time bounding boxes and confidence analysis.
+              Detects Leopard with real-time bounding boxes and high-precision confidence analysis. Restricted exclusively to Panthera pardus.
             </p>
           </div>
 

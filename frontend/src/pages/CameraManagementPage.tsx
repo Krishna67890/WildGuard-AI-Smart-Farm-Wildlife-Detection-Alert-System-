@@ -35,7 +35,7 @@ export const CameraManagementPage: React.FC = () => {
     locationDescription: '',
     detectionEnabled: true,
     minConfidence: 0.65,
-    animalCategories: ['leopard', 'tiger', 'elephant', 'wild_boar', 'human'],
+    animalCategories: ['leopard', 'human'],
     minDetectionDurationSec: 2,
     zoneDetectionEnabled: true,
     alarmEnabled: true,
@@ -47,7 +47,7 @@ export const CameraManagementPage: React.FC = () => {
   });
 
   useEffect(() => {
-    if (showAddModal && newCam.sourceType === 'BROWSER_WEBCAM') {
+    if (showAddModal && newCam.sourceType === 'INTERNAL_HARDWARE') {
       const startPreview = async () => {
         try {
           if (previewStream) {
@@ -59,7 +59,7 @@ export const CameraManagementPage: React.FC = () => {
           setPreviewStream(stream);
           if (previewVideoRef.current) previewVideoRef.current.srcObject = stream;
         } catch (err) {
-          console.error("Failed to start webcam preview:", err);
+          console.error("Failed to start hardware preview:", err);
         }
       };
       startPreview();
@@ -81,7 +81,7 @@ export const CameraManagementPage: React.FC = () => {
       const zonesRes = await fetchApi<{ success: boolean; zones: Zone[] }>('/zones');
       if (zonesRes.success) setZones(zonesRes.zones);
 
-      // Get available media devices for webcam support
+      // Get available media devices for hardware support
       if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
         const devices = await navigator.mediaDevices.enumerateDevices();
         setAvailableDevices(devices.filter(d => d.kind === 'videoinput'));
@@ -123,8 +123,8 @@ export const CameraManagementPage: React.FC = () => {
   const resetForm = () => {
     setNewCam({
       name: '',
-      brand: '',
-      model: '',
+      brand: 'WildGuard',
+      model: 'Edge-AI Node',
       sourceType: 'IP_NETWORK',
       protocol: 'RTSP',
       ipAddress: '',
@@ -137,7 +137,7 @@ export const CameraManagementPage: React.FC = () => {
       locationDescription: '',
       detectionEnabled: true,
       minConfidence: 0.65,
-      animalCategories: ['leopard', 'tiger', 'elephant', 'wild_boar', 'human'],
+      animalCategories: ['leopard', 'human'],
       minDetectionDurationSec: 2,
       zoneDetectionEnabled: true,
       alarmEnabled: true,
@@ -151,7 +151,7 @@ export const CameraManagementPage: React.FC = () => {
   };
 
   const handleSaveCamera = async () => {
-    if (!newCam.name || (!newCam.ipAddress && newCam.sourceType !== 'BROWSER_WEBCAM')) {
+    if (!newCam.name || (!newCam.ipAddress && newCam.sourceType !== 'INTERNAL_HARDWARE')) {
       alert('Please fill in required fields (Name and IP Address)');
       return;
     }
@@ -181,7 +181,12 @@ export const CameraManagementPage: React.FC = () => {
 
   const handleDeleteCamera = async (id: string) => {
     if (!window.confirm('Are you sure you want to delete this camera?')) return;
-    // Implementation for delete...
+    try {
+      await fetchApi(`/cameras/${id}`, { method: 'DELETE' });
+      setCameras(cameras.filter(c => c.id !== id));
+    } catch (err) {
+      console.error('Failed to delete camera');
+    }
   };
 
   const toggleCameraStatus = async (id: string, currentStatus: string) => {
@@ -204,10 +209,10 @@ export const CameraManagementPage: React.FC = () => {
         <div>
           <h1 className="text-xl font-extrabold text-white flex items-center space-x-2">
             <CameraIcon className="w-5 h-5 text-emerald-400" />
-            <span>IP Camera & Surveillance Management</span>
+            <span>CCTV & Network Surveillance Management</span>
           </h1>
           <p className="text-xs text-slate-400">
-            Configure high-definition network streams, AI detection parameters, and ethical deterrence rules
+            Configure high-definition leopard-centric network streams and hardware internal cameras.
           </p>
         </div>
 
@@ -217,7 +222,7 @@ export const CameraManagementPage: React.FC = () => {
             className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-lg shadow-emerald-950/50 transition flex items-center space-x-2"
           >
             <Plus className="w-4 h-4" />
-            <span>Add Camera</span>
+            <span>Add Hardware Source</span>
           </button>
         )}
       </div>
@@ -233,7 +238,7 @@ export const CameraManagementPage: React.FC = () => {
                   <Video className="w-12 h-12 text-slate-700" />
                   <div className="absolute top-2 left-2 px-2 py-1 bg-black/60 rounded text-[10px] text-emerald-400 font-mono flex items-center space-x-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span>LIVE PREVIEW</span>
+                    <span>LIVE SURVEILLANCE</span>
                   </div>
                 </div>
               ) : (
@@ -260,7 +265,9 @@ export const CameraManagementPage: React.FC = () => {
               <div className="flex justify-between items-start">
                 <div>
                   <h3 className="font-bold text-white text-sm">{cam.name}</h3>
-                  <p className="text-[10px] text-slate-400 font-mono">{cam.ipAddress}:{cam.port} [{cam.protocol}]</p>
+                  <p className="text-[10px] text-slate-400 font-mono">
+                    {cam.sourceType === 'INTERNAL_HARDWARE' ? 'Hardware Dev' : `${cam.ipAddress}:${cam.port}`} [{cam.protocol}]
+                  </p>
                 </div>
                 <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
                   cam.status === 'ONLINE' || cam.status === 'STREAMING' ? 'bg-emerald-950 text-emerald-300 border border-emerald-800' : 'bg-rose-950 text-rose-300 border border-rose-800'
@@ -282,7 +289,7 @@ export const CameraManagementPage: React.FC = () => {
 
               <div className="flex items-center justify-between pt-2 border-t border-slate-800">
                 <div className="flex items-center space-x-3">
-                  <div className="flex items-center space-x-1" title="AI Detection">
+                  <div className="flex items-center space-x-1" title="Leopard Detection Active">
                     <Activity className={`w-3.5 h-3.5 ${cam.detectionEnabled ? 'text-emerald-400' : 'text-slate-600'}`} />
                     <span className="text-[10px] text-slate-400">AI</span>
                   </div>
@@ -310,7 +317,7 @@ export const CameraManagementPage: React.FC = () => {
             className="border-2 border-dashed border-slate-800 rounded-2xl aspect-video flex flex-col items-center justify-center text-slate-500 hover:border-emerald-500 hover:text-emerald-500 transition-all bg-slate-900/40"
           >
             <Plus className="w-10 h-10 mb-2" />
-            <span className="font-bold text-sm">Add New Source</span>
+            <span className="font-bold text-sm">Add CCTV / Internal Hardware</span>
           </button>
         )}
       </div>
@@ -321,8 +328,8 @@ export const CameraManagementPage: React.FC = () => {
           <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl animate-fade-in">
             <div className="p-6 border-b border-slate-800 flex justify-between items-center sticky top-0 bg-slate-900 z-10">
               <div>
-                <h2 className="text-xl font-bold text-white">Add IP / Network Camera</h2>
-                <p className="text-xs text-slate-400">Configure new surveillance source and AI parameters</p>
+                <h2 className="text-xl font-bold text-white">Add CCTV / Hardware Camera</h2>
+                <p className="text-xs text-slate-400">Restricted to IP/Network and direct hardware inputs for Farmer security</p>
               </div>
               <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-white">
                 <Trash2 className="w-5 h-5 rotate-45" />
@@ -391,73 +398,39 @@ export const CameraManagementPage: React.FC = () => {
                     Network Settings
                   </h3>
                   <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-bold text-slate-500 uppercase">IP Address / Host</label>
-                        <input
-                          type="text"
-                          placeholder="192.168.1.100"
-                          className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-emerald-500 outline-none"
-                          value={newCam.ipAddress}
-                          onChange={e => setNewCam({...newCam, ipAddress: e.target.value})}
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-bold text-slate-500 uppercase">Port</label>
-                        <input
-                          type="number"
-                          placeholder="554"
-                          className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-emerald-500 outline-none"
-                          value={newCam.port}
-                          onChange={e => setNewCam({...newCam, port: parseInt(e.target.value)})}
-                        />
-                      </div>
-                    </div>
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold text-slate-500 uppercase">Protocol & Source Type</label>
-                      <div className="flex space-x-2">
-                        <select
-                          className="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-emerald-500 outline-none"
-                          value={newCam.sourceType}
-                          onChange={e => {
-                            const val = e.target.value as CameraSourceType;
-                            setNewCam({
-                              ...newCam,
-                              sourceType: val,
-                              ipAddress: val === 'BROWSER_WEBCAM' ? 'LOCAL_HOST' : newCam.ipAddress,
-                              protocol: val === 'BROWSER_WEBCAM' ? 'WEBRTC' : newCam.protocol
-                            });
-                          }}
-                        >
-                          <option value="IP_NETWORK">IP / Network Camera</option>
-                          <option value="BROWSER_WEBCAM">Local Device Camera (Mobile/PC)</option>
-                          <option value="SIMULATION">Simulation (Test Mode)</option>
-                        </select>
-                        <select
-                          className="w-32 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-emerald-500 outline-none"
-                          value={newCam.protocol}
-                          onChange={e => setNewCam({...newCam, protocol: e.target.value as CameraProtocol})}
-                        >
-                          <option value="RTSP">RTSP</option>
-                          <option value="HTTP">HTTP/HLS</option>
-                          <option value="WEBRTC">WebRTC</option>
-                        </select>
-                      </div>
+                      <label className="text-[10px] font-bold text-slate-500 uppercase">Source Type</label>
+                      <select
+                        className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-emerald-500 outline-none"
+                        value={newCam.sourceType}
+                        onChange={e => {
+                          const val = e.target.value as CameraSourceType;
+                          setNewCam({
+                            ...newCam,
+                            sourceType: val,
+                            ipAddress: val === 'INTERNAL_HARDWARE' ? 'LOCAL_HOST' : newCam.ipAddress,
+                            protocol: val === 'INTERNAL_HARDWARE' ? 'WEBRTC' : newCam.protocol
+                          });
+                        }}
+                      >
+                        <option value="IP_NETWORK">IP / CCTV Network Camera</option>
+                        <option value="INTERNAL_HARDWARE">Internal Hardware Camera (USB/Laptop/Mobile)</option>
+                      </select>
                     </div>
 
-                    {newCam.sourceType === 'BROWSER_WEBCAM' ? (
+                    {newCam.sourceType === 'INTERNAL_HARDWARE' ? (
                       <div className="space-y-4">
                         <div className="space-y-1.5">
-                          <label className="text-[10px] font-bold text-slate-500 uppercase">Select Camera Device</label>
+                          <label className="text-[10px] font-bold text-slate-500 uppercase">Detected Hardware</label>
                           <select
                             className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-emerald-500 outline-none"
                             value={newCam.assignedDeviceId}
                             onChange={e => setNewCam({...newCam, assignedDeviceId: e.target.value})}
                           >
-                            <option value="">Default Camera</option>
+                            <option value="">Default Hardware</option>
                             {availableDevices.map(device => (
                               <option key={device.deviceId} value={device.deviceId}>
-                                {device.label || `Camera ${device.deviceId.slice(0, 5)}...`}
+                                {device.label || `Device ${device.deviceId.slice(0, 5)}...`}
                               </option>
                             ))}
                           </select>
@@ -475,27 +448,54 @@ export const CameraManagementPage: React.FC = () => {
                           <div className="absolute inset-0 bg-emerald-500/10 pointer-events-none" />
                           <div className="absolute top-2 left-2 bg-emerald-600 text-[8px] font-black text-white px-2 py-1 rounded-md uppercase tracking-widest flex items-center space-x-1">
                             <div className="w-1 h-1 bg-white rounded-full animate-pulse" />
-                            <span>Hardware Active</span>
+                            <span>Internal Feed Active</span>
                           </div>
                         </div>
-                        <p className="text-[9px] text-slate-500 italic">This will use the camera of the current mobile or PC device.</p>
                       </div>
                     ) : (
                       <>
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] font-bold text-slate-500 uppercase">Stream URL / Path</label>
-                          <div className="flex space-x-2">
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase">IP / Host</label>
                             <input
                               type="text"
-                              placeholder="/live"
-                              className="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-emerald-500 outline-none"
-                              value={newCam.streamPath}
-                              onChange={e => setNewCam({...newCam, streamPath: e.target.value})}
+                              placeholder="192.168.1.100"
+                              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-emerald-500 outline-none"
+                              value={newCam.ipAddress}
+                              onChange={e => setNewCam({...newCam, ipAddress: e.target.value})}
                             />
-                            <div className="bg-slate-800 rounded-lg px-3 flex items-center text-[10px] text-slate-400 font-mono">
-                              {newCam.protocol}://...
-                            </div>
                           </div>
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase">Port</label>
+                            <input
+                              type="number"
+                              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-emerald-500 outline-none"
+                              value={newCam.port}
+                              onChange={e => setNewCam({...newCam, port: parseInt(e.target.value)})}
+                            />
+                          </div>
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-bold text-slate-500 uppercase">Protocol</label>
+                          <select
+                            className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-emerald-500 outline-none"
+                            value={newCam.protocol}
+                            onChange={e => setNewCam({...newCam, protocol: e.target.value as CameraProtocol})}
+                          >
+                            <option value="RTSP">RTSP (Recommended for CCTV)</option>
+                            <option value="HTTP">HTTP / HLS</option>
+                            <option value="WEBRTC">WebRTC (Low Latency)</option>
+                          </select>
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-bold text-slate-500 uppercase">Stream Path</label>
+                          <input
+                            type="text"
+                            placeholder="/live"
+                            className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-emerald-500 outline-none"
+                            value={newCam.streamPath}
+                            onChange={e => setNewCam({...newCam, streamPath: e.target.value})}
+                          />
                         </div>
                         <div className="grid grid-cols-2 gap-3">
                           <div className="space-y-1.5">
@@ -532,11 +532,11 @@ export const CameraManagementPage: React.FC = () => {
                 <section>
                   <h3 className="text-xs font-bold text-amber-400 uppercase tracking-widest mb-4 flex items-center">
                     <Activity className="w-3.5 h-3.5 mr-2" />
-                    AI Detection Settings
+                    Leopard-Only AI Settings
                   </h3>
                   <div className="space-y-4 bg-slate-950/50 p-4 rounded-xl border border-slate-800">
                     <label className="flex items-center justify-between cursor-pointer">
-                      <span className="text-xs text-slate-300">Enable Edge AI Inference</span>
+                      <span className="text-xs text-slate-300">Enable AI Detection</span>
                       <input
                         type="checkbox"
                         checked={newCam.detectionEnabled}
@@ -557,29 +557,18 @@ export const CameraManagementPage: React.FC = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-bold text-slate-500 uppercase">Detection Categories</label>
+                      <label className="text-[10px] font-bold text-slate-500 uppercase">Restricted Target Species</label>
                       <div className="flex flex-wrap gap-2">
-                        {['leopard', 'tiger', 'elephant', 'wild_boar', 'human', 'deer', 'monkey'].map(cat => (
-                          <button
+                        {['leopard', 'human'].map(cat => (
+                          <div
                             key={cat}
-                            onClick={() => {
-                              const cats = newCam.animalCategories || [];
-                              if (cats.includes(cat as any)) {
-                                setNewCam({...newCam, animalCategories: cats.filter(c => c !== cat)});
-                              } else {
-                                setNewCam({...newCam, animalCategories: [...cats, cat as any]});
-                              }
-                            }}
-                            className={`px-2 py-1 rounded text-[9px] font-bold border transition ${
-                              newCam.animalCategories?.includes(cat as any)
-                                ? 'bg-emerald-600/20 border-emerald-500 text-emerald-400'
-                                : 'bg-slate-900 border-slate-800 text-slate-500'
-                            }`}
+                            className="px-3 py-1.5 rounded-lg text-[10px] font-bold border bg-emerald-600/20 border-emerald-500 text-emerald-400"
                           >
-                            {cat.toUpperCase()}
-                          </button>
+                            {cat.toUpperCase()} (ACTIVE)
+                          </div>
                         ))}
                       </div>
+                      <p className="text-[9px] text-slate-500 italic">Generic wildlife categories have been removed to optimize leopard-specific defense.</p>
                     </div>
                   </div>
                 </section>
@@ -587,24 +576,24 @@ export const CameraManagementPage: React.FC = () => {
                 <section>
                   <h3 className="text-xs font-bold text-rose-400 uppercase tracking-widest mb-4 flex items-center">
                     <Bell className="w-3.5 h-3.5 mr-2" />
-                    Alert & Deterrence
+                    Farmer Alert System
                   </h3>
                   <div className="grid grid-cols-2 gap-3">
                     <label className="flex items-center space-x-2 bg-slate-950 p-2.5 rounded-lg border border-slate-800 cursor-pointer">
                       <input type="checkbox" checked={newCam.alarmEnabled} onChange={e => setNewCam({...newCam, alarmEnabled: e.target.checked})} className="accent-rose-500" />
-                      <span className="text-[11px] text-slate-300">Sound Alarm</span>
+                      <span className="text-[11px] text-slate-300">Siren Strobe</span>
                     </label>
                     <label className="flex items-center space-x-2 bg-slate-950 p-2.5 rounded-lg border border-slate-800 cursor-pointer">
                       <input type="checkbox" checked={newCam.notificationsEnabled} onChange={e => setNewCam({...newCam, notificationsEnabled: e.target.checked})} className="accent-rose-500" />
-                      <span className="text-[11px] text-slate-300">Push Notifications</span>
+                      <span className="text-[11px] text-slate-300">Mobile SMS/Push</span>
                     </label>
                     <label className="flex items-center space-x-2 bg-slate-950 p-2.5 rounded-lg border border-slate-800 cursor-pointer">
                       <input type="checkbox" checked={newCam.snapshotEnabled} onChange={e => setNewCam({...newCam, snapshotEnabled: e.target.checked})} className="accent-rose-500" />
-                      <span className="text-[11px] text-slate-300">Auto Snapshot</span>
+                      <span className="text-[11px] text-slate-300">Cloud Evidence</span>
                     </label>
                     <label className="flex items-center space-x-2 bg-slate-950 p-2.5 rounded-lg border border-slate-800 cursor-pointer">
                       <input type="checkbox" checked={newCam.recordingEnabled} onChange={e => setNewCam({...newCam, recordingEnabled: e.target.checked})} className="accent-rose-500" />
-                      <span className="text-[11px] text-slate-300">Event Recording</span>
+                      <span className="text-[11px] text-slate-300">Continuous Rec</span>
                     </label>
                   </div>
                 </section>
@@ -614,14 +603,14 @@ export const CameraManagementPage: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-white uppercase flex items-center">
                       <Globe className="w-3.5 h-3.5 mr-2 text-cyan-400" />
-                      Connection Verification
+                      Hardware Verification
                     </span>
                     <button
                       onClick={handleTestConnection}
                       disabled={testingConnection}
                       className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-[10px] font-bold text-white rounded-lg border border-slate-700 transition"
                     >
-                      {testingConnection ? 'CONNECTING...' : 'TEST CONNECTION'}
+                      {testingConnection ? 'DIAGNOSING...' : 'TEST FEED'}
                     </button>
                   </div>
 
@@ -629,16 +618,16 @@ export const CameraManagementPage: React.FC = () => {
                     <div className={`p-3 rounded-lg border text-xs ${testResult.success ? 'bg-emerald-950/40 border-emerald-800 text-emerald-300' : 'bg-rose-950/40 border-rose-800 text-rose-300'}`}>
                       <div className="flex items-center space-x-2 font-bold mb-1">
                         {testResult.success ? <CheckCircle2 className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}
-                        <span>{testResult.success ? 'SUCCESS: Camera Reachable' : 'FAILED: Unable to Connect'}</span>
+                        <span>{testResult.success ? 'LINK SECURED' : 'LINK FAILED'}</span>
                       </div>
                       {testResult.success ? (
                         <div className="grid grid-cols-3 gap-2 mt-2 font-mono text-[10px]">
-                          <div>Latency: <span className="text-white">{testResult.stats.latency}ms</span></div>
-                          <div>Res: <span className="text-white">{testResult.stats.resolution}</span></div>
+                          <div>Ping: <span className="text-white">{testResult.stats.latency}ms</span></div>
+                          <div>Stream: <span className="text-white">ENCRYPTED</span></div>
                           <div>FPS: <span className="text-white">{testResult.stats.fps}</span></div>
                         </div>
                       ) : (
-                        <p className="mt-1 opacity-80">{testResult.message}. Possible reasons: Incorrect IP/Port, Credentials, or Firewall.</p>
+                        <p className="mt-1 opacity-80">{testResult.message}</p>
                       )}
                     </div>
                   )}
@@ -657,7 +646,7 @@ export const CameraManagementPage: React.FC = () => {
                 onClick={handleSaveCamera}
                 className="px-8 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg transition"
               >
-                Save Camera Configuration
+                Deploy Hardware Node
               </button>
             </div>
           </div>

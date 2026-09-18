@@ -1,12 +1,6 @@
 export type WildlifeSpecies = 
   | 'leopard'
-  | 'tiger'
-  | 'elephant'
-  | 'wild_boar'
-  | 'deer'
-  | 'monkey'
-  | 'human'
-  | 'unknown';
+  | 'human';
 
 export type ThreatLevel = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 
@@ -14,7 +8,7 @@ export type ZoneType = 'SAFE' | 'MONITORING' | 'WARNING' | 'CRITICAL';
 
 export type IncidentStatus = 'ACTIVE' | 'ACKNOWLEDGED' | 'RESOLVED';
 
-export type UserRole = 'ADMIN' | 'FARMER' | 'VIEWER';
+export type UserRole = 'FARMER';
 
 export type AlarmStatus = 'STANDBY' | 'TRIGGERED' | 'ACKNOWLEDGED' | 'MUTED';
 
@@ -98,13 +92,10 @@ export type CameraStatus =
 
 export type CameraSourceType =
   | 'IP_NETWORK'
-  | 'BROWSER_WEBCAM'
-  | 'USB'
+  | 'INTERNAL_HARDWARE'
   | 'RTSP'
   | 'HTTP_HLS'
-  | 'WEBRTC'
-  | 'ESP32_CAM'
-  | 'SIMULATION';
+  | 'WEBRTC';
 
 export type CameraProtocol = 'RTSP' | 'HLS' | 'HTTP' | 'WEBRTC' | 'UDP' | 'TCP';
 
@@ -223,8 +214,11 @@ export interface User {
   role: UserRole;
   phone: string;
   farmName: string;
-  location?: string;
+  farmId: string;
+  systemId: string;
+  gpsCoordinates?: { lat: number; lng: number };
   address?: string;
+  farmDescription?: string;
 }
 
 export interface ThreatEngineConfig {

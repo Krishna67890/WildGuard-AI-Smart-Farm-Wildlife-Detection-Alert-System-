@@ -32,15 +32,10 @@ export const AnalyticsPage: React.FC = () => {
     LOW: '#10b981'
   };
 
-  // Format species data for charts
-  const speciesChartData = analyticsData?.speciesCounts ? [
-    { name: 'Wild Boar', count: analyticsData.speciesCounts.wild_boar },
-    { name: 'Deer', count: analyticsData.speciesCounts.deer },
-    { name: 'Monkey', count: analyticsData.speciesCounts.monkey },
-    { name: 'Elephant', count: analyticsData.speciesCounts.elephant },
-    { name: 'Leopard', count: analyticsData.speciesCounts.leopard },
-    { name: 'Tiger', count: analyticsData.speciesCounts.tiger }
-  ] : [];
+  const speciesChartData = [
+    { name: 'Leopard', count: analyticsData?.speciesCounts?.leopard || 0 },
+    { name: 'Human', count: analyticsData?.speciesCounts?.human || 0 }
+  ];
 
   const threatChartData = analyticsData?.threatCounts ? [
     { name: 'Critical', value: analyticsData.threatCounts.CRITICAL, color: '#ef4444' },
@@ -89,7 +84,7 @@ export const AnalyticsPage: React.FC = () => {
         </div>
 
         <p className="text-sm text-slate-200 leading-relaxed font-medium">
-          &ldquo;{analyticsData?.aiGeneratedInsight?.summary || 'Most wildlife activity occurred between 19:00 and 02:00 this week, with the North Forest Perimeter recording the highest number of confirmed apex predator incidents (Leopard & Tiger).'}&rdquo;
+          &ldquo;{analyticsData?.aiGeneratedInsight?.summary || 'Most leopard activity occurred between 19:00 and 02:00 this week, with the North Forest Perimeter recording the highest number of confirmed leopard incidents.'}&rdquo;
         </p>
 
         <div className="pt-2 border-t border-slate-800/80">
@@ -99,7 +94,7 @@ export const AnalyticsPage: React.FC = () => {
           <ul className="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs text-slate-300">
             {(analyticsData?.aiGeneratedInsight?.recommendations || [
               'Reinforce acoustic buzzer frequency on CAM-01 between 20:00 and 04:00.',
-              'Deploy solar strobe deterrents along East boundary canal to repel elephant herds non-violently.',
+              'Deploy solar strobe deterrents along East boundary canal to repel leopard intrusions non-violently.',
               'Maintain farm personnel curfew near Zone 4 homestead past 21:00.'
             ]).map((rec: string, idx: number) => (
               <li key={idx} className="p-2.5 rounded-lg bg-slate-950/80 border border-slate-800/80 flex items-start space-x-2">
@@ -181,7 +176,7 @@ export const AnalyticsPage: React.FC = () => {
           </div>
 
           <p className="text-[10px] text-slate-400 text-center">
-            Multi-factor threat engine filters minor herbivore events into LOW/MEDIUM.
+            Multi-factor threat engine filters events into LOW/MEDIUM/HIGH/CRITICAL based on farm proximity.
           </p>
         </div>
 

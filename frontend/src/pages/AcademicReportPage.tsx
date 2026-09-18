@@ -93,7 +93,7 @@ export const AcademicReportPage: React.FC = () => {
 
               <h3 className="text-base font-bold text-white pt-2">Primary Engineering Objectives</h3>
               <ul className="list-disc pl-5 space-y-1.5 text-xs text-slate-300">
-                <li>Deploy high-fidelity deep learning object detection for real-time identification of wild species (Leopard, Tiger, Elephant, Wild Boar, Deer, Monkey, Human).</li>
+                <li>Deploy high-fidelity deep learning object detection for real-time identification of Panthera pardus (Leopard) and its eight recognized subspecies.</li>
                 <li>Implement a multi-factor Threat Assessment Engine evaluating species danger, dwell duration, directional vector, human coexistence, and zone severity.</li>
                 <li>Eliminate sensor fatigue using temporal multi-frame confirmation to prevent false alarms from leaves, shadows, and weather.</li>
                 <li>Integrate hardware-in-the-loop IoT prototype using ESP32 nodes running non-harmful 2.4kHz acoustic deterrence sirens.</li>
@@ -127,7 +127,7 @@ export const AcademicReportPage: React.FC = () => {
                     <tr>
                       <td className="p-3 font-bold text-white">Species Discrimination</td>
                       <td className="p-3 text-rose-300">Zero; trips equally on cattle, wind, fallen branches</td>
-                      <td className="p-3 text-emerald-300">YOLO-family deep learning with 8 verified wildlife classes</td>
+                      <td className="p-3 text-emerald-300">YOLO-family deep learning optimized for Panthera pardus subspecies identification</td>
                     </tr>
                     <tr>
                       <td className="p-3 font-bold text-white">False Alarm Rate</td>
@@ -192,8 +192,8 @@ export const AcademicReportPage: React.FC = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                 <div className="p-3 bg-slate-950 rounded-lg border border-slate-800">
-                  <strong className="text-white block">$S$ (Species Danger Tier):</strong>
-                  Tiger/Leopard (0.95–1.0), Elephant (0.85), Boar (0.70), Monkey/Deer (0.25–0.40)
+                  <strong className="text-white block">$S$ (Subspecies/Age Factor):</strong>
+                  Adult Leopard (1.0), Sub-adult (0.85), Cub (0.40), Non-predatory Fauna (0.10)
                 </div>
                 <div className="p-3 bg-slate-950 rounded-lg border border-slate-800">
                   <strong className="text-white block">$Z$ (Zone Severity & Proximity):</strong>
@@ -201,7 +201,7 @@ export const AcademicReportPage: React.FC = () => {
                 </div>
                 <div className="p-3 bg-slate-950 rounded-lg border border-slate-800">
                   <strong className="text-white block">$H$ (Human Co-occurrence Risk):</strong>
-                  Elevates score to $\ge 0.94$ if apex predator is within critical proximity of humans.
+                  Elevates score to $\ge 0.94$ if a leopard is detected within critical proximity of human settlements.
                 </div>
                 <div className="p-3 bg-slate-950 rounded-lg border border-slate-800">
                   <strong className="text-white block">$D$ (Dwell Time) & $M$ (Vector):</strong>
@@ -288,7 +288,7 @@ export const AcademicReportPage: React.FC = () => {
 {`TABLE Incidents {
   id: VARCHAR(32) PRIMARY KEY,
   detectionId: VARCHAR(32),
-  species: ENUM('leopard', 'tiger', 'elephant', 'wild_boar', 'deer', 'monkey', 'human'),
+  species: ENUM('leopard', 'human'),
   confidence: FLOAT,
   threatLevel: ENUM('LOW', 'MEDIUM', 'HIGH', 'CRITICAL'),
   threatScore: FLOAT,
@@ -399,7 +399,7 @@ export const AcademicReportPage: React.FC = () => {
 
                 <div className="p-3.5 bg-slate-950 rounded-xl border border-slate-800 space-y-1.5">
                   <strong className="text-amber-300 font-bold block">
-                    Q4: What happens when a human is detected near an apex predator?
+                    Q4: What happens when a human is detected near a leopard?
                   </strong>
                   <p className="text-slate-300 leading-relaxed">
                     <strong>Model Answer:</strong> The threat engine activates the co-occurrence factor $H$, immediately elevating the threat score to CRITICAL ($\ge 0.94$), sounding the web audio siren, locking the emergency modal on screen, and dispatching SMS/WhatsApp alerts.

@@ -15,9 +15,11 @@ interface AlertContextType {
   activeAlert: Incident | null;
   setActiveAlert: (inc: Incident | null) => void;
   isSirenActive: boolean;
+  setIsSirenActive: (active: boolean) => void;
   isMuted: boolean;
   toggleMute: () => void;
   toasts: ToastMessage[];
+  addToast: (title: string, description: string, type?: ToastMessage['type']) => void;
   removeToast: (id: string) => void;
   acknowledgeIncident: (id: string) => Promise<void>;
   resolveIncident: (id: string, notes?: string) => Promise<void>;
@@ -63,27 +65,49 @@ export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     fetchApi<{ success: boolean; data: any }>('/dashboard/summary')
       .then(res => {
         if (res.success && res.data.activeCriticalIncident) {
-          setActiveAlert(res.data.activeCriticalIncident);
-          if (res.data.activeCriticalIncident.alarmStatus === 'TRIGGERED') {
-            setIsSirenActive(true);
-            audioSiren.startSiren();
-          }
+          const incident = res.data.activeCriticalIncident;
+          setActiveAlert(incident);
+
+          // SYNC REQUIREMENT: Do NOT automatically trigger acoustic siren on initial load
+          // to prevent startling users during page refresh or login.
+          // The UI will show the active alert, but siren stays standby until new detection.
+          setIsSirenActive(false);
         }
       })
       .catch(err => console.warn('AlertContext initial fetch warning:', err));
   }, []);
 
+  // Sync Audio Siren with isSirenActive state
+  useEffect(() => {
+    if (isSirenActive && !isMuted) {
+      audioSiren.startSiren();
+    } else {
+      audioSiren.stopSiren();
+    }
+  }, [isSirenActive, isMuted]);
+
   // Listen to real-time WebSocket events
   useEffect(() => {
     const unsubNewInc = wsClient.on('NEW_INCIDENT', (incident: Incident) => {
-      if (incident.threatLevel === 'CRITICAL' || incident.threatLevel === 'HIGH') {
+      // ONLY trigger siren if it is a leopard
+      const isLeopard = incident.species.toLowerCase() === 'leopard';
+
+      if (isLeopard && (incident.threatLevel === 'CRITICAL' || incident.threatLevel === 'HIGH')) {
         setActiveAlert(incident);
         setIsSirenActive(true);
-        audioSiren.startSiren();
         addToast(
-          `🚨 ${incident.threatLevel} WILDLIFE ALERT`,
-          `${incident.species.toUpperCase()} detected at ${incident.cameraName} (${Math.round(incident.confidence * 100)}% conf).`,
+          `🚨 ${incident.threatLevel} LEOPARD ALERT`,
+          `Panthera pardus detected at ${incident.cameraName} (${Math.round(incident.confidence * 100)}% conf).`,
           incident.threatLevel === 'CRITICAL' ? 'CRITICAL' : 'HIGH'
+        );
+      } else if (incident.threatLevel === 'CRITICAL' || incident.threatLevel === 'HIGH') {
+        // Other critical animals (tiger/elephant) trigger UI alert but NO siren as per user requirement
+        setActiveAlert(incident);
+        setIsSirenActive(false);
+        addToast(
+          `⚠️ ${incident.threatLevel} WILDLIFE DETECTED`,
+          `${incident.species.toUpperCase()} detected at ${incident.cameraName}. Monitoring protocol active.`,
+          'HIGH'
         );
       } else {
         addToast(
@@ -95,7 +119,6 @@ export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     });
 
     const unsubAck = wsClient.on('INCIDENT_ACKNOWLEDGED', (incident: Incident) => {
-      audioSiren.stopSiren();
       setIsSirenActive(false);
       if (activeAlert?.id === incident.id) {
         setActiveAlert(prev => prev ? { ...prev, status: 'ACKNOWLEDGED', alarmStatus: 'MUTED' } : null);
@@ -108,7 +131,6 @@ export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     });
 
     const unsubRes = wsClient.on('INCIDENT_RESOLVED', (incident: Incident) => {
-      audioSiren.stopSiren();
       setIsSirenActive(false);
       if (activeAlert?.id === incident.id) {
         setActiveAlert(null);
@@ -171,7 +193,40 @@ export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         body: JSON.stringify({ scenario })
       });
     } catch (err) {
-      console.error('Simulation trigger failed:', err);
+      console.warn('Backend simulation trigger failed, executing local fallback:', err);
+
+      // Local Fallback for Viva/Demo if backend is unreachable
+      const isLeopard = scenario.includes('leopard');
+      const isCritical = isLeopard || scenario.includes('critical');
+      if (isCritical) {
+        const mockIncident: Incident = {
+          id: `sim-${Date.now()}`,
+          detectionId: `det-${Date.now()}`,
+          species: isLeopard ? 'leopard' : 'human' as any,
+          confidence: 0.98,
+          threatLevel: 'CRITICAL',
+          threatScore: 0.98,
+          threatReason: 'Simulated Perimeter Breach',
+          cameraId: 'cam-01',
+          cameraName: 'North Sector Node',
+          zoneId: 'zone-1',
+          zoneName: 'Main Perimeter',
+          timestamp: new Date().toISOString(),
+          durationSeconds: 10,
+          snapshotUrl: '',
+          alarmStatus: isLeopard ? 'TRIGGERED' : 'STANDBY',
+          notificationStatus: 'SENT',
+          status: 'ACTIVE'
+        };
+
+        setActiveAlert(mockIncident);
+        setIsSirenActive(isLeopard);
+        addToast(
+          isLeopard ? `🚨 CRITICAL INTRUSION (LOCAL)` : `⚠️ HUMAN DETECTED (LOCAL)`,
+          isLeopard ? `${mockIncident.species.toUpperCase()} detected! Siren activated via local failsafe.` : `Human detected at boundary. Monitoring active.`,
+          isLeopard ? 'CRITICAL' : 'HIGH'
+        );
+      }
     }
   };
 
@@ -181,9 +236,11 @@ export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         activeAlert,
         setActiveAlert,
         isSirenActive,
+        setIsSirenActive,
         isMuted,
         toggleMute,
         toasts,
+        addToast,
         removeToast,
         acknowledgeIncident,
         resolveIncident,
