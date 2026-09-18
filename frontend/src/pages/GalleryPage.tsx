@@ -166,70 +166,13 @@ const animals: AnimalInfo[] = [
 export const GalleryPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAnimal, setSelectedAnimal] = useState<AnimalInfo | null>(null);
-  const [activeTab, setActiveTab] = useState<'ALL_SPECIES' | 'LIVE_SIGHTINGS' | 'MEDIA_LIBRARY'>('ALL_SPECIES');
+  const [activeTab, setActiveTab] = useState<'ALL_SPECIES'>('ALL_SPECIES');
   const [loading, setLoading] = useState(false);
   const [recentDetections, setRecentDetections] = useState<Detection[]>([]);
-  const [mediaArchive, setMediaArchive] = useState<any[]>([
-    {
-      id: 'm1',
-      type: 'image',
-      url: 'https://images.unsplash.com/photo-1615963244664-5b84436ba15e?auto=format&fit=crop&w=800&q=80',
-      filename: 'LEOPARD_DET_001.JPG',
-      sector: 'North Perimeter',
-      species: 'Leopard'
-    },
-    {
-      id: 'm2',
-      type: 'image',
-      url: 'https://images.unsplash.com/photo-1575550959106-5a7defe28b56?auto=format&fit=crop&w=800&q=80',
-      filename: 'LEOPARD_DET_002.JPG',
-      sector: 'East Sector',
-      species: 'Leopard'
-    },
-    {
-      id: 'm3',
-      type: 'image',
-      url: leopard3,
-      filename: 'LEOPARD_DET_003.JPG',
-      sector: 'West Buffer',
-      species: 'Leopard'
-    },
-    {
-      id: 'm4',
-      type: 'image',
-      url: leopard4,
-      filename: 'LEOPARD_DET_004.JPG',
-      sector: 'Central Homestead',
-      species: 'Leopard'
-    },
-    {
-      id: 'm5',
-      type: 'image',
-      url: leopard5,
-      filename: 'EXT_LEOPARD_01.JPG',
-      sector: 'South Boundary',
-      species: 'Leopard'
-    },
-    {
-      id: 'm6',
-      type: 'image',
-      url: leopard1,
-      filename: 'EXT_LEOPARD_02.JPG',
-      sector: 'River Trail',
-      species: 'Leopard'
-    }
-  ]);
 
   useEffect(() => {
-    if (activeTab === 'LIVE_SIGHTINGS') {
-      setLoading(true);
-      fetchApi<{ success: boolean; incidents: any[] }>('/incidents?limit=10')
-        .then(res => {
-          if (res.success) setRecentDetections(res.incidents);
-        })
-        .finally(() => setLoading(false));
-    }
-  }, [activeTab]);
+    // Media library and sightings tabs are removed as per leopard-exclusive system focus.
+  }, []);
 
   const filteredAnimals = useMemo(() =>
     animals.filter(animal =>
@@ -283,8 +226,6 @@ export const GalleryPage: React.FC = () => {
         <div className="flex bg-slate-900 border border-slate-800 rounded-3xl p-1.5 w-full md:w-auto">
           {[
             { id: 'ALL_SPECIES', label: 'Encyclopedia', icon: Leaf },
-            { id: 'LIVE_SIGHTINGS', label: 'Sightings', icon: Camera },
-            { id: 'MEDIA_LIBRARY', label: 'Media', icon: ImageIcon }
           ].map((tab) => (
             <button
               key={tab.id}
@@ -363,145 +304,7 @@ export const GalleryPage: React.FC = () => {
         </div>
       )}
 
-      {activeTab === 'LIVE_SIGHTINGS' && (
-        <div className="space-y-6">
-          {loading ? (
-            <div className="flex flex-col items-center justify-center py-20 space-y-4">
-              <div className="w-12 h-12 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin" />
-              <div className="text-slate-500 text-xs font-black uppercase tracking-widest">Accessing Sensor Data...</div>
-            </div>
-          ) : recentDetections.length > 0 ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {recentDetections.map((det: any) => (
-                <div key={det.id} className="bg-slate-900 border border-slate-800 rounded-[2.5rem] overflow-hidden flex flex-col sm:flex-row p-4 gap-6 group hover:border-emerald-500/30 transition-all">
-                  <div className="w-full sm:w-48 h-48 rounded-2xl overflow-hidden bg-black relative flex-shrink-0">
-                    {(det.frameImageUrl || det.snapshotUrl) ? (
-                      <img src={det.frameImageUrl || det.snapshotUrl} className="w-full h-full object-cover" alt="Detection" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-slate-800">
-                        <Camera className="w-12 h-12 text-slate-700" />
-                      </div>
-                    )}
-                    <div className="absolute top-2 left-2 bg-rose-600 text-white text-[8px] font-black px-2 py-1 rounded-md uppercase">
-                      Incident #{det.id.slice(0, 4)}
-                    </div>
-                  </div>
-                  <div className="flex-1 space-y-4 py-2">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <div className="flex items-center space-x-2 mb-1">
-                          <span className={`w-2 h-2 rounded-full ${det.threatLevel === 'CRITICAL' ? 'bg-rose-500 animate-pulse' : 'bg-amber-500'}`} />
-                          <h4 className="text-xl font-black text-white uppercase">{det.species}</h4>
-                        </div>
-                        <div className="text-[10px] text-slate-500 font-bold flex items-center space-x-2">
-                          <Clock className="w-3 h-3" />
-                          <span>{new Date(det.timestamp).toLocaleString()}</span>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-[18px] font-black text-emerald-400">{Math.round(det.confidence * 100)}%</div>
-                        <div className="text-[8px] text-slate-500 font-black uppercase">Confidence</div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                        <div className="text-[8px] text-slate-500 font-black uppercase mb-0.5">Location / Zone</div>
-                        <div className="text-[10px] text-white font-bold truncate">{det.cameraName} • {det.zoneName}</div>
-                      </div>
-                      <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                        <div className="text-[8px] text-slate-500 font-black uppercase mb-0.5">Analysis</div>
-                        <div className="text-[10px] text-white font-bold">{det.direction} • {det.distanceToBoundaryMeters}m</div>
-                      </div>
-                    </div>
-
-                    <div className="flex space-x-2">
-                      <button className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white text-[9px] font-black uppercase py-2.5 rounded-xl transition shadow-lg shadow-emerald-900/20">
-                        View Analysis
-                      </button>
-                      <button className="px-3 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl transition">
-                        <Share2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="bg-slate-900 border border-slate-800 border-dashed rounded-[2.5rem] py-20 text-center space-y-4">
-              <div className="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mx-auto">
-                <Shield className="w-10 h-10 text-slate-600" />
-              </div>
-              <div className="max-w-xs mx-auto space-y-2">
-                <h3 className="text-white font-black uppercase">No Recent Sightings</h3>
-                <p className="text-slate-500 text-xs">All sectors currently reported as secure. AI surveillance active.</p>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {activeTab === 'MEDIA_LIBRARY' && (
-        <div className="space-y-8">
-           <div className="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-8 relative overflow-hidden">
-             <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 blur-[80px] -z-0" />
-             <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
-                <div className="space-y-2">
-                   <h3 className="text-2xl font-black text-white uppercase tracking-tighter">Hardware Stream Archive</h3>
-                   <p className="text-slate-500 text-sm font-medium">Local device recordings and snapshot history from mobile/PC nodes.</p>
-                </div>
-                <div className="flex space-x-3">
-                   <button className="px-6 py-3 bg-slate-950 border border-slate-800 rounded-2xl text-xs font-black text-white uppercase hover:bg-slate-800 transition-all">
-                      Storage: 84% Free
-                   </button>
-                   <button className="px-6 py-3 bg-emerald-600 text-white rounded-2xl text-xs font-black uppercase hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-900/20">
-                      Sync All Nodes
-                   </button>
-                </div>
-             </div>
-           </div>
-
-           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {mediaArchive.map((media, i) => (
-              <div key={media.id} className="group relative aspect-square bg-slate-900 border border-slate-800 rounded-[2rem] overflow-hidden cursor-pointer hover:border-emerald-500/50 transition-all hover:shadow-2xl hover:shadow-emerald-500/10">
-                <div className="w-full h-full bg-slate-800/50 flex items-center justify-center relative overflow-hidden">
-                  <ImageIcon className="w-10 h-10 text-slate-700 group-hover:scale-110 transition-transform duration-500" />
-                  <img
-                    src={media.url}
-                    className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-700"
-                    alt={media.filename}
-                  />
-                  <div className="absolute inset-0 bg-slate-950/20 group-hover:bg-transparent transition-colors" />
-                </div>
-
-                <div className="absolute top-4 left-4 right-4 flex justify-between items-start opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                   <span className="px-2 py-1 bg-black/60 backdrop-blur-md rounded-lg text-[8px] font-black text-white border border-white/10 uppercase">
-                     {media.type}
-                   </span>
-                   <button className="p-2 bg-emerald-600 rounded-full text-white shadow-xl transform translate-y-2 group-hover:translate-y-0 transition-transform">
-                      {media.type === 'video' ? <Play className="w-3 h-3 fill-current" /> : <Eye className="w-3 h-3" />}
-                   </button>
-                </div>
-
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-6 flex flex-col justify-end">
-                  <div className="text-[10px] font-black text-emerald-400 uppercase mb-1">{media.sector} • {media.species}</div>
-                  <div className="text-sm font-black text-white truncate">{media.filename}</div>
-                  <div className="flex items-center space-x-3 mt-3">
-                    <button className="p-2 bg-white/10 hover:bg-emerald-500 hover:text-white rounded-lg transition-colors text-white/70">
-                      <Download className="w-3.5 h-3.5" />
-                    </button>
-                    <button className="p-2 bg-white/10 hover:bg-rose-500 hover:text-white rounded-lg transition-colors text-white/70">
-                      <AlertCircle className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Modal for Detailed View */}
+      {/* Advanced Call to Action */}
       {selectedAnimal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 backdrop-blur-xl animate-in fade-in duration-300">
           <div className="bg-slate-900 border border-slate-800 rounded-[3rem] w-full max-w-6xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col lg:flex-row relative">

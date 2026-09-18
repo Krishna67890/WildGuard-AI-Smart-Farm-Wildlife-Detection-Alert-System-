@@ -16,14 +16,14 @@ interface DashboardProps {
 export const DashboardPage: React.FC<DashboardProps> = ({ onNavigate }) => {
   const { activeAlert, isSirenActive, toggleMute, isMuted, acknowledgeIncident } = useAlert();
   const [metrics, setMetrics] = useState<any>({
-    totalIncidents: 4,
-    activeAlertsCount: 1,
-    criticalAlertsCount: 1,
-    resolvedCount: 2,
-    onlineCameras: 4,
-    totalCameras: 4,
-    onlineIoTDevices: 2,
-    alarmActive: true
+    totalIncidents: 0,
+    activeAlertsCount: 0,
+    criticalAlertsCount: 0,
+    resolvedCount: 0,
+    onlineCameras: 0,
+    totalCameras: 0,
+    onlineIoTDevices: 0,
+    alarmActive: false
   });
   const [recentIncidents, setRecentIncidents] = useState<Incident[]>([]);
   const [highRiskZones, setHighRiskZones] = useState<Zone[]>([]);
@@ -239,14 +239,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({ onNavigate }) => {
                       direction: 'APPROACHING',
                       timestamp: activeAlert.timestamp,
                       bbox: activeAlert.bbox
-                    } : (primaryCamera.status === 'CRITICAL' ? {
-                      threatLevel: 'CRITICAL',
-                      species: 'leopard',
-                      confidence: 0.94,
-                      distanceMeters: 12,
-                      direction: 'APPROACHING',
-                      timestamp: new Date().toISOString()
-                    } : undefined)
+                    } : undefined
                   }}
                   isNightVision={false}
                   isFocused={true}
