@@ -222,6 +222,7 @@ export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           zoneName: 'Main Perimeter',
           timestamp: new Date().toISOString(),
           durationSeconds: 10,
+          snapshotUrl: '/assets/leopard_1.jpg',
           frameImageUrl: '/assets/leopard_1.jpg',
           alarmStatus: 'TRIGGERED',
           notificationStatus: 'SENT',
