@@ -13,8 +13,13 @@ import { Detection, WildlifeSpecies } from '../types/index';
 import leopard1 from '../assets/leopard_1.jpg';
 import leopard2 from '../assets/leopard_2.jpg';
 import leopard3 from '../assets/leopard_3.jpg';
-import leopard4 from '../assets/leopard_4.jpg';
+import leopard4 from '../assets/leopard_4.webp';
 import leopard5 from '../assets/leopard_5.jpg';
+import leopard6 from '../assets/leopard_1.jpg';
+import leopard7 from '../assets/leopard_2.jpg';
+import leopard8 from '../assets/leopard_3.jpg';
+import leopard9 from '../assets/leopard_4.webp';
+import leopard10 from '../assets/leopard_5.jpg';
 
 interface AnimalInfo {
   id: string;
@@ -106,7 +111,7 @@ const animals: AnimalInfo[] = [
     habitat: 'Southeast Asia, Southern China.',
     population: 'Critically Endangered / Endangered.',
     funFact: 'Often found in tropical rain forests and dry evergreen forests.',
-    imageUrl: 'https://images.unsplash.com/photo-1621768406798-e7d3839634e9?auto=format&fit=crop&w=800&q=80',
+    imageUrl: leopard6,
     tags: ['Southeast Asia', 'Rainforest', 'Rare']
   },
   {
@@ -119,7 +124,7 @@ const animals: AnimalInfo[] = [
     habitat: 'Sri Lanka, various habitats including dry evergreen monsoon forests.',
     population: 'Endangered.',
     funFact: 'Being the apex predator, they are less nocturnal than other leopards.',
-    imageUrl: 'https://images.unsplash.com/photo-1507666405821-432ffb1670ae?auto=format&fit=crop&w=800&q=80',
+    imageUrl: leopard7,
     tags: ['Sri Lanka', 'Apex Predator', 'Endemic']
   },
   {
@@ -132,7 +137,7 @@ const animals: AnimalInfo[] = [
     habitat: 'Iran, Caucasus, Turkey, Turkmenistan.',
     population: 'Endangered.',
     funFact: 'The largest subspecies of leopard.',
-    imageUrl: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=800&q=80',
+    imageUrl: leopard8,
     tags: ['Largest', 'Middle East', 'Caucasus']
   },
   {
@@ -145,7 +150,7 @@ const animals: AnimalInfo[] = [
     habitat: 'Northern China, forests and mountains.',
     population: 'Estimated fewer than 2,500 mature individuals.',
     funFact: 'First described in 1862 by Gray.',
-    imageUrl: 'https://images.unsplash.com/photo-1614027164847-1b280143299c?auto=format&fit=crop&q=80&w=800',
+    imageUrl: leopard9,
     tags: ['North China', 'Rare', 'Mountain Habitat']
   },
   {
@@ -158,7 +163,7 @@ const animals: AnimalInfo[] = [
     habitat: 'Taurus Mountains, Turkey.',
     population: 'Critically Endangered.',
     funFact: 'Named after the ancient region of Anatolia.',
-    imageUrl: 'https://images.unsplash.com/photo-1621768406798-e7d3839634e9?auto=format&fit=crop&q=80&w=800',
+    imageUrl: leopard10,
     tags: ['Turkey', 'Rediscovered', 'Taurus Mountains']
   }
 ];
@@ -166,12 +171,23 @@ const animals: AnimalInfo[] = [
 export const GalleryPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAnimal, setSelectedAnimal] = useState<AnimalInfo | null>(null);
-  const [activeTab, setActiveTab] = useState<'ALL_SPECIES'>('ALL_SPECIES');
+  const [activeTab, setActiveTab] = useState<'ALL_SPECIES' | 'MEDIA_ARCHIVE'>('ALL_SPECIES');
   const [loading, setLoading] = useState(false);
-  const [recentDetections, setRecentDetections] = useState<Detection[]>([]);
+  const [mediaArchive] = useState<any[]>([
+    { id: 'm1', url: leopard1, filename: 'AFRICAN_LEOPARD_01.JPG', sector: 'North Perimeter', species: 'Leopard' },
+    { id: 'm2', url: leopard2, filename: 'INDIAN_LEOPARD_02.JPG', sector: 'East Sector', species: 'Leopard' },
+    { id: 'm3', url: leopard3, filename: 'JAVAN_LEOPARD_03.JPG', sector: 'West Buffer', species: 'Leopard' },
+    { id: 'm4', url: leopard4, filename: 'ARABIAN_LEOPARD_04.JPG', sector: 'Central Homestead', species: 'Leopard' },
+    { id: 'm5', url: leopard5, filename: 'AMUR_LEOPARD_05.JPG', sector: 'South Boundary', species: 'Leopard' },
+    { id: 'm6', url: leopard6, filename: 'INDOCHINESE_LEOPARD_06.WEBP', sector: 'River Trail', species: 'Leopard' },
+    { id: 'm7', url: leopard7, filename: 'SRILANKAN_LEOPARD_07.WEBP', sector: 'Ridge View', species: 'Leopard' },
+    { id: 'm8', url: leopard8, filename: 'PERSIAN_LEOPARD_08.WEBP', sector: 'Cattle Area', species: 'Leopard' },
+    { id: 'm9', url: leopard9, filename: 'NORTHCHINESE_LEOPARD_09.WEBP', sector: 'Maize Fields', species: 'Leopard' },
+    { id: 'm10', url: leopard10, filename: 'ANATOLIAN_LEOPARD_10.WEBP', sector: 'Perimeter Wall', species: 'Leopard' }
+  ]);
 
   useEffect(() => {
-    // Media library and sightings tabs are removed as per leopard-exclusive system focus.
+    // Gallery is strictly Leopard-exclusive. Non-leopard media purged.
   }, []);
 
   const filteredAnimals = useMemo(() =>
@@ -226,6 +242,7 @@ export const GalleryPage: React.FC = () => {
         <div className="flex bg-slate-900 border border-slate-800 rounded-3xl p-1.5 w-full md:w-auto">
           {[
             { id: 'ALL_SPECIES', label: 'Encyclopedia', icon: Leaf },
+            { id: 'MEDIA_ARCHIVE', label: 'Media Archive', icon: ImageIcon },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -297,6 +314,23 @@ export const GalleryPage: React.FC = () => {
                       </span>
                     ))}
                   </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {activeTab === 'MEDIA_ARCHIVE' && (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          {mediaArchive.map((item) => (
+            <div key={item.id} className="group relative aspect-square bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden hover:border-emerald-500/50 transition-all">
+              <img src={item.url} alt={item.filename} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+                <div className="text-[9px] font-black text-emerald-400 truncate">{item.filename}</div>
+                <div className="flex items-center text-[8px] text-slate-400 mt-0.5">
+                  <MapPin className="w-2 h-2 mr-1" /> {item.sector}
                 </div>
               </div>
             </div>

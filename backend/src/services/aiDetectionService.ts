@@ -2,6 +2,7 @@ import { db } from '../database/store.js';
 import { Detection, WildlifeSpecies, ThreatLevel, BoundingBox } from '../types/index.js';
 import { threatEngine, ThreatEvaluationInput } from './threatEngineService.js';
 import { alertOrchestrator } from './alertOrchestrator.js';
+import { iotBridge } from './iotBridgeService.js';
 
 export interface ExternalDetectionPayload {
   species: WildlifeSpecies;
@@ -51,11 +52,34 @@ export class AIDetectionService {
       db.latestDetections.pop();
     }
 
+    // Prevent duplicate active incidents for the same camera and species to avoid alarm spam
+    const existingIncident = db.incidents.find(i =>
+      i.status === 'ACTIVE' &&
+      i.cameraId === camera.id &&
+      i.species === input.species
+    );
+
+    // Broadcast detection regardless of incident status for real-time UI overlays
+    alertOrchestrator.notifyDetection(detection);
+
     let incidentCreated = false;
     // If threat requires alarm or is confirmed high/critical, create incident
     if (evalResult.shouldTriggerAlarm || evalResult.threatLevel === 'CRITICAL' || evalResult.threatLevel === 'HIGH') {
-      alertOrchestrator.createIncidentFromDetection(detection);
-      incidentCreated = true;
+      if (!existingIncident) {
+        alertOrchestrator.createIncidentFromDetection(detection);
+        incidentCreated = true;
+      } else {
+        // Update existing incident telemetry
+        existingIncident.timestamp = detection.timestamp;
+        existingIncident.threatScore = detection.threatScore;
+        existingIncident.threatLevel = detection.threatLevel;
+
+        // Ensure alarm is active if current detection qualifies and hasn't been muted
+        if (evalResult.shouldTriggerAlarm && existingIncident.alarmStatus === 'STANDBY') {
+          existingIncident.alarmStatus = 'TRIGGERED';
+          iotBridge.triggerAlarm();
+        }
+      }
     }
 
     return { detection, incidentCreated };
@@ -80,7 +104,7 @@ export class AIDetectionService {
           humanPresent: false,
           animalCount: 1,
           isSimulatedTrigger: true,
-          frameImageUrl: 'https://images.unsplash.com/photo-1575550959106-5a7defe28b56?auto=format&fit=crop&w=800&q=80'
+          frameImageUrl: '/assets/leopard_1.jpg'
         });
       }
 
@@ -97,7 +121,7 @@ export class AIDetectionService {
           humanPresent: false,
           animalCount: 2,
           isSimulatedTrigger: true,
-          frameImageUrl: 'https://images.unsplash.com/photo-1615963244664-5b84436ba15e?auto=format&fit=crop&w=800&q=80'
+          frameImageUrl: '/assets/leopard_2.jpg'
         });
       }
 
@@ -114,13 +138,13 @@ export class AIDetectionService {
           humanPresent: false,
           animalCount: 1,
           isSimulatedTrigger: true,
-          frameImageUrl: 'https://images.unsplash.com/photo-1602491453631-e2a5ad90a131?auto=format&fit=crop&w=800&q=80'
+          frameImageUrl: '/assets/leopard_3.jpg'
         });
       }
 
       case 'human_risk': {
         return this.processDetection({
-          species: 'human', // The primary intruder being simulated here is a human for risk assessment
+          species: 'human',
           confidence: 0.93,
           bbox: { x: 0.20, y: 0.25, width: 0.35, height: 0.45 },
           cameraId: 'cam-3',
@@ -128,10 +152,10 @@ export class AIDetectionService {
           distanceToBoundaryMeters: 8,
           durationSeconds: 24,
           direction: 'APPROACHING',
-          humanPresent: true,
+          humanPresent: false, // In this case, species IS human
           animalCount: 1,
           isSimulatedTrigger: true,
-          frameImageUrl: 'https://images.unsplash.com/photo-1508333706533-1ab43ecb16ad?auto=format&fit=crop&w=800&q=80'
+          frameImageUrl: '/assets/human_1.jpg'
         });
       }
 
@@ -149,13 +173,13 @@ export class AIDetectionService {
           humanPresent: false,
           animalCount: 1,
           isSimulatedTrigger: true,
-          frameImageUrl: 'https://images.unsplash.com/photo-1456926631375-92c8ce872def?auto=format&fit=crop&w=800&q=80'
+          frameImageUrl: '/assets/leopard_5.jpg'
         });
       }
 
       default: {
         return this.processDetection({
-          species: 'human',
+          species: 'leopard',
           confidence: 0.82,
           bbox: { x: 0.40, y: 0.30, width: 0.18, height: 0.25 },
           cameraId: 'cam-4',
@@ -166,7 +190,7 @@ export class AIDetectionService {
           humanPresent: false,
           animalCount: 1,
           isSimulatedTrigger: true,
-          frameImageUrl: '/snapshots/sample_human.jpg'
+          frameImageUrl: '/assets/leopard_1.webp'
         });
       }
     }

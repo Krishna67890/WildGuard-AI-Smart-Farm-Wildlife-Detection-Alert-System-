@@ -19,6 +19,13 @@ export class AlertOrchestrator {
   }
 
   /**
+   * Broadcast raw detection telemetry for UI overlays
+   */
+  public notifyDetection(detection: Detection) {
+    this.notifyClients('RAW_DETECTION', detection);
+  }
+
+  /**
    * Generates a new confirmed incident from a high-threat detection
    */
   public createIncidentFromDetection(detection: Detection): Incident {

@@ -75,7 +75,86 @@ class DataStore {
     }
   ];
 
-  public cameras: Camera[] = [];
+  public cameras: Camera[] = [
+    {
+      id: 'cam-1',
+      name: 'North Perimeter Gate',
+      locationDescription: 'Main entrance from forest side',
+      zoneId: 'zone-1',
+      status: 'ONLINE',
+      sourceType: 'CCTV',
+      protocol: 'RTSP',
+      ipAddress: '192.168.1.101',
+      port: 554,
+      streamPath: '/live/ch1',
+      priority: 'CRITICAL',
+      resolution: '1920x1080',
+      fps: 30,
+      inferenceFps: 15,
+      latencyMs: 45,
+      uptimeSeconds: 3600,
+      reconnectAttempts: 0,
+      lastHeartbeat: new Date().toISOString(),
+      detectionEnabled: true,
+      minConfidence: 0.65,
+      animalCategories: ['leopard'],
+      minDetectionDurationSec: 2,
+      zoneDetectionEnabled: true,
+      lineCrossingEnabled: true,
+      proximityDetectionEnabled: true,
+      repeatedDetectionEnabled: true,
+      alarmEnabled: true,
+      notificationsEnabled: true,
+      snapshotEnabled: true,
+      recordingEnabled: true,
+      alertCooldownSec: 60,
+      audioEnabled: true,
+      autoStart: true,
+      sensitivity: 85,
+      threatThreshold: 'HIGH',
+      recordingMode: 'AI_DETECTION',
+      notificationMode: 'ALL'
+    },
+    {
+      id: 'cam-2',
+      name: 'East Sugarcane Field',
+      locationDescription: 'Overlooking the eastern corridor',
+      zoneId: 'zone-2',
+      status: 'ONLINE',
+      sourceType: 'CCTV',
+      protocol: 'RTSP',
+      ipAddress: '192.168.1.102',
+      port: 554,
+      streamPath: '/live/ch1',
+      priority: 'HIGH',
+      resolution: '1920x1080',
+      fps: 30,
+      inferenceFps: 12,
+      latencyMs: 60,
+      uptimeSeconds: 3600,
+      reconnectAttempts: 0,
+      lastHeartbeat: new Date().toISOString(),
+      detectionEnabled: true,
+      minConfidence: 0.70,
+      animalCategories: ['leopard'],
+      minDetectionDurationSec: 3,
+      zoneDetectionEnabled: true,
+      lineCrossingEnabled: false,
+      proximityDetectionEnabled: true,
+      repeatedDetectionEnabled: true,
+      alarmEnabled: true,
+      notificationsEnabled: true,
+      snapshotEnabled: true,
+      recordingEnabled: true,
+      alertCooldownSec: 120,
+      audioEnabled: true,
+      autoStart: true,
+      sensitivity: 75,
+      threatThreshold: 'HIGH',
+      recordingMode: 'AI_DETECTION',
+      notificationMode: 'ALL'
+    }
+  ];
 
   public iotDevices: IoTDevice[] = [
     {
@@ -109,21 +188,20 @@ class DataStore {
   ];
 
   public config: ThreatEngineConfig = {
-    minConfidenceThreshold: 0.65,
-    consecutiveFramesRequired: 3,
-    minDetectionDurationSec: 2,
+    minConfidenceThreshold: 0.50,
+    consecutiveFramesRequired: 2,
+    minDetectionDurationSec: 1,
     weights: {
-      speciesDanger: 0.35,
-      zoneProximity: 0.25,
+      speciesDanger: 0.45,
+      zoneProximity: 0.35,
       confidence: 0.10,
       duration: 0.10,
       movement: 0.05,
-      humanCoexistence: 0.10,
+      humanCoexistence: 0.0,
       density: 0.05
     },
     speciesDangerMap: {
-      leopard: 1.0,
-      human: 0.10
+      leopard: 1.0
     },
     zoneSeverityMap: {
       CRITICAL: 1.0,

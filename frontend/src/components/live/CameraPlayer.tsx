@@ -105,12 +105,13 @@ export const CameraPlayer: React.FC<CameraPlayerProps> = ({
       // Simulation detection
       const detection = camera.currentDetection;
       if (detection) {
-        // LEOPARD ALARM LOGIC: Only alarm if leopard detected
-        if (detection.species === 'leopard' && detection.confidence > 0.8) {
+        // LEOPARD ALARM LOGIC: Only alarm if leopard detected (Case-insensitive)
+        const isLeopard = detection.species?.toLowerCase() === 'leopard';
+        if (isLeopard && (detection.threatLevel === 'CRITICAL' || detection.threatLevel === 'HIGH')) {
           const now = Date.now();
           if (now - lastLeopardDetectionTime > 5000) { // Cooldown 5s
             setIsSirenActive(true);
-            addToast("🚨 LEOPARD DETECTED!", "Emergency protocols activated.", "CRITICAL");
+            addToast("🚨 LEOPARD DETECTED!", `Emergency protocols activated for ${camera.name}.`, "CRITICAL");
             lastLeopardDetectionTime = now;
           }
         }
@@ -130,7 +131,7 @@ export const CameraPlayer: React.FC<CameraPlayerProps> = ({
           boxH = isFocused ? 120 : 60;
         }
 
-        const color = detection.species === 'leopard' ? '#ef4444' : '#eab308';
+        const color = detection.species?.toLowerCase() === 'leopard' ? '#ef4444' : '#eab308';
         ctx.strokeStyle = color;
         ctx.lineWidth = isFocused ? 3 : 2;
         ctx.strokeRect(boxX, boxY, boxW, boxH);

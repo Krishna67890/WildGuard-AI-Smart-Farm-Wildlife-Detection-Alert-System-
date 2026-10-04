@@ -118,9 +118,8 @@ export const IncidentHistoryPage: React.FC<IncidentHistoryPageProps> = ({
             onChange={(e) => setFilterSpecies(e.target.value)}
             className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
           >
-            <option value="ALL">All Target Categories</option>
+            <option value="ALL">All Detections</option>
             <option value="leopard">Leopard</option>
-            <option value="human">Human</option>
           </select>
         </div>
 
@@ -172,9 +171,9 @@ export const IncidentHistoryPage: React.FC<IncidentHistoryPageProps> = ({
           </div>
         </div>
         <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
-          <div className="text-[10px] font-black text-slate-500 uppercase mb-1">Human Intrusion Frequency</div>
+          <div className="text-[10px] font-black text-slate-500 uppercase mb-1">Total Leopard Encounters</div>
           <div className="text-xl font-black text-emerald-500">
-            {incidents.filter(i => i.species === 'human').length}
+            {incidents.filter(i => i.species === 'leopard').length}
           </div>
         </div>
         <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
@@ -303,12 +302,20 @@ export const IncidentHistoryPage: React.FC<IncidentHistoryPageProps> = ({
               
               {/* Evidence Snapshot Frame Placeholder */}
               <div className="relative aspect-video rounded-xl bg-black border border-slate-800 overflow-hidden flex items-center justify-center">
-                <div className="text-center space-y-2">
-                  <Eye className="w-8 h-8 text-emerald-500/60 mx-auto" />
-                  <p className="text-xs text-slate-400 font-mono">
-                    Snapshot Capture &bull; {selectedIncident.species.toUpperCase()} [{Math.round(selectedIncident.confidence * 100)}%]
-                  </p>
-                  <p className="text-[10px] text-slate-500">
+                <img
+                  src={selectedIncident.frameImageUrl || (selectedIncident.species === 'leopard' ? '/assets/leopard_1.jpg' : '/snapshots/sample_leopard.jpg')}
+                  alt="Evidence capture"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                <div className="absolute bottom-4 left-4 text-left space-y-1">
+                  <div className="flex items-center space-x-2">
+                    <Eye className="w-4 h-4 text-emerald-500" />
+                    <span className="text-xs text-white font-black uppercase tracking-widest">
+                      Live Capture &bull; {selectedIncident.species.toUpperCase()} [{Math.round(selectedIncident.confidence * 100)}%]
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-400 font-mono">
                     Recorded by {selectedIncident.cameraName} at {new Date(selectedIncident.timestamp).toLocaleString()}
                   </p>
                 </div>

@@ -4,6 +4,16 @@ WildGuard AI is a specialized, ethical edge AI surveillance system exclusively d
 
 ---
 
+## 📹 Multi-Source Surveillance Capabilities
+
+WildGuard AI supports three distinct types of surveillance inputs, optimized for different deployment environments:
+
+1. **CCTV (Network/IP):** Connects to professional-grade security cameras via RTSP. This is the primary source for 24/7 high-fidelity monitoring.
+2. **PC/Mobile (Hardware):** Leverages internal laptop cameras or connected mobile devices via WebRTC. Ideal for quick deployment or portable monitoring stations.
+3. **Still Photo (Snapshot):** Monitors static locations via scheduled HTTP snapshots or local file paths. This source type is specifically designed for low-bandwidth scenarios or for simulating leopard detections using manual image paths.
+
+---
+
 ## 🏗️ Core Architecture & Specialized Defense Logic
 
 The system is fine-tuned for a single-species mission: mitigating leopard-related threats while ignoring non-predatory wildlife.
@@ -58,8 +68,26 @@ Acoustic sirens and IoT deterrents are **only** activated when a leopard is veri
 
 ## ⚡ Examiner Simulation Suite
 
-The system includes specific simulation scenarios to verify leopard-only detection logic:
+WildGuard AI includes multiple verification pathways for viva/demonstration:
 
-1. **`leopard_critical`**: Simulates a leopard breach. Triggers full-screen alert and acoustic siren.
-2. **`human_detection`**: Simulates a human at the boundary. The system logs the event but **does not** trigger the siren (Strict Leopard-Only Logic).
-3. **`monitoring_mode`**: General surveillance verification.
+### 1. The Examiner Toolbar (Dashboard)
+Use the **"Simulate Leopard"** buttons in the dashboard toolbar for an instant end-to-end test. This bypasses local camera hardware to verify:
+- WebSocket event propagation (`NEW_INCIDENT`).
+- Dashboard UI flashing and Critical Toast alerts.
+- **Acoustic Audio Siren** activation (strictly for leopards).
+
+### 2. Live Edge AI Inference (Webcam Test)
+To demonstrate real-time computer vision detection using a leopard photo:
+1.  **Start the Backend**: Ensure the Node.js server is running on port 5000.
+2.  **Initialize AI Service**:
+    ```bash
+    cd ai_service
+    pip install -r requirements.txt
+    python yolo_detector.py
+    ```
+3.  **Perform Detection**: Show a leopard photo to your webcam.
+    - The Python script uses a **morphological proxy map** (mapping 'cat/dog' detections to 'leopard') to allow standard YOLO models to function as leopards for the demo.
+    - The Dashboard will display a **red bounding box** instantly via the `RAW_DETECTION` stream.
+    - If the leopard is held for $>1$ second, a **confirmed incident** is created, and the siren is triggered.
+
+---

@@ -14,6 +14,7 @@ interface ToastMessage {
 interface AlertContextType {
   activeAlert: Incident | null;
   setActiveAlert: (inc: Incident | null) => void;
+  rawDetection: any | null;
   isSirenActive: boolean;
   setIsSirenActive: (active: boolean) => void;
   isMuted: boolean;
@@ -30,6 +31,7 @@ const AlertContext = createContext<AlertContextType | undefined>(undefined);
 
 export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [activeAlert, setActiveAlert] = useState<Incident | null>(null);
+  const [rawDetection, setRawDetection] = useState<any | null>(null);
   const [isSirenActive, setIsSirenActive] = useState<boolean>(false);
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
@@ -88,6 +90,12 @@ export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Listen to real-time WebSocket events
   useEffect(() => {
+    const unsubDetection = wsClient.on('RAW_DETECTION', (data: any) => {
+      setRawDetection(data);
+      // Auto-clear raw detection after 2 seconds if no new ones come in
+      setTimeout(() => setRawDetection((prev: any) => prev?.id === data.id ? null : prev), 2000);
+    });
+
     const unsubNewInc = wsClient.on('NEW_INCIDENT', (incident: Incident) => {
       // ONLY trigger siren if it is a leopard
       const isLeopard = incident.species.toLowerCase() === 'leopard';
@@ -143,6 +151,7 @@ export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     });
 
     return () => {
+      unsubDetection();
       unsubNewInc();
       unsubAck();
       unsubRes();
@@ -202,7 +211,7 @@ export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         const mockIncident: Incident = {
           id: `sim-${Date.now()}`,
           detectionId: `det-${Date.now()}`,
-          species: isLeopard ? 'leopard' : 'human' as any,
+          species: 'leopard',
           confidence: 0.98,
           threatLevel: 'CRITICAL',
           threatScore: 0.98,
@@ -213,8 +222,8 @@ export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           zoneName: 'Main Perimeter',
           timestamp: new Date().toISOString(),
           durationSeconds: 10,
-          snapshotUrl: '',
-          alarmStatus: isLeopard ? 'TRIGGERED' : 'STANDBY',
+          frameImageUrl: '/assets/leopard_1.jpg',
+          alarmStatus: 'TRIGGERED',
           notificationStatus: 'SENT',
           status: 'ACTIVE'
         };
@@ -235,6 +244,7 @@ export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       value={{
         activeAlert,
         setActiveAlert,
+        rawDetection,
         isSirenActive,
         setIsSirenActive,
         isMuted,

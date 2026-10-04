@@ -14,7 +14,7 @@ interface DashboardProps {
 }
 
 export const DashboardPage: React.FC<DashboardProps> = ({ onNavigate }) => {
-  const { activeAlert, isSirenActive, toggleMute, isMuted, acknowledgeIncident } = useAlert();
+  const { activeAlert, rawDetection, isSirenActive, toggleMute, isMuted, acknowledgeIncident } = useAlert();
   const [metrics, setMetrics] = useState<any>({
     totalIncidents: 0,
     activeAlertsCount: 0,
@@ -231,7 +231,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({ onNavigate }) => {
                 <CameraPlayer
                   camera={{
                     ...primaryCamera,
-                    currentDetection: activeAlert?.cameraId === primaryCamera.id ? {
+                    currentDetection: (rawDetection && rawDetection.cameraId === primaryCamera.id) ? rawDetection : (activeAlert?.cameraId === primaryCamera.id ? {
                       threatLevel: activeAlert.threatLevel,
                       species: activeAlert.species,
                       confidence: activeAlert.confidence,
@@ -239,7 +239,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({ onNavigate }) => {
                       direction: 'APPROACHING',
                       timestamp: activeAlert.timestamp,
                       bbox: activeAlert.bbox
-                    } : undefined
+                    } : undefined)
                   }}
                   isNightVision={false}
                   isFocused={true}
@@ -270,16 +270,18 @@ export const DashboardPage: React.FC<DashboardProps> = ({ onNavigate }) => {
             {/* Quick stats strip below camera */}
             <div className="grid grid-cols-3 gap-2 text-center text-xs">
               <div className="p-2 rounded-lg bg-slate-950 border border-slate-800">
-                <span className="text-slate-400 text-[10px] block">Current Target</span>
-                <span className="font-extrabold text-white">Leopard / Human</span>
+                <span className="text-slate-400 text-[10px] block uppercase font-black">Current Target</span>
+                <span className="font-extrabold text-white">Leopard Species Only</span>
               </div>
               <div className="p-2 rounded-lg bg-slate-950 border border-slate-800">
-                <span className="text-slate-400 text-[10px] block">Detection Confidence</span>
-                <span className="font-extrabold text-emerald-400">94.2% Verified</span>
+                <span className="text-slate-400 text-[10px] block uppercase font-black">AI Validation</span>
+                <span className="font-extrabold text-emerald-400">Temporal Verification</span>
               </div>
               <div className="p-2 rounded-lg bg-slate-950 border border-slate-800">
-                <span className="text-slate-400 text-[10px] block">Threat Score</span>
-                <span className="font-extrabold text-rose-400">0.92 / 1.00</span>
+                <span className="text-slate-400 text-[10px] block uppercase font-black">Alert Status</span>
+                <span className={`font-extrabold ${activeAlert ? 'text-rose-400' : 'text-emerald-400'}`}>
+                  {activeAlert ? 'ACTIVE' : 'IDLE'}
+                </span>
               </div>
             </div>
 

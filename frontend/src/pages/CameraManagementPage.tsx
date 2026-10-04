@@ -23,7 +23,7 @@ export const CameraManagementPage: React.FC = () => {
     name: '',
     brand: 'WildGuard',
     model: 'Edge-AI Node',
-    sourceType: 'IP_NETWORK',
+    sourceType: 'CCTV',
     protocol: 'RTSP',
     ipAddress: '',
     port: 554,
@@ -47,7 +47,7 @@ export const CameraManagementPage: React.FC = () => {
   });
 
   useEffect(() => {
-    if (showAddModal && newCam.sourceType === 'INTERNAL_HARDWARE') {
+    if (showAddModal && newCam.sourceType === 'PC_MOBILE') {
       const startPreview = async () => {
         try {
           if (previewStream) {
@@ -125,7 +125,7 @@ export const CameraManagementPage: React.FC = () => {
       name: '',
       brand: 'WildGuard',
       model: 'Edge-AI Node',
-      sourceType: 'IP_NETWORK',
+      sourceType: 'CCTV',
       protocol: 'RTSP',
       ipAddress: '',
       port: 554,
@@ -151,15 +151,15 @@ export const CameraManagementPage: React.FC = () => {
   };
 
   const handleSaveCamera = async () => {
-    if (!newCam.name || (!newCam.ipAddress && newCam.sourceType !== 'INTERNAL_HARDWARE')) {
-      alert('Please fill in required fields (Name and IP Address)');
+    if (!newCam.name || (!newCam.ipAddress && newCam.sourceType === 'CCTV')) {
+      alert('Please fill in required fields (Name and IP Address for CCTV)');
       return;
     }
 
     try {
       // Auto-construct RTSP URL if missing and data exists
       let finalCam = { ...newCam };
-      if (finalCam.sourceType === 'IP_NETWORK' && finalCam.protocol === 'RTSP' && !finalCam.mainStreamUrl) {
+      if (finalCam.sourceType === 'CCTV' && finalCam.protocol === 'RTSP' && !finalCam.mainStreamUrl) {
         const auth = finalCam.username ? `${finalCam.username}:${finalCam.password}@` : '';
         finalCam.mainStreamUrl = `rtsp://${auth}${finalCam.ipAddress}:${finalCam.port}${finalCam.streamPath || '/live'}`;
       }
@@ -209,10 +209,10 @@ export const CameraManagementPage: React.FC = () => {
         <div>
           <h1 className="text-xl font-extrabold text-white flex items-center space-x-2">
             <CameraIcon className="w-5 h-5 text-emerald-400" />
-            <span>CCTV & Network Surveillance Management</span>
+            <span>Multi-Source Leopard Surveillance Management</span>
           </h1>
           <p className="text-xs text-slate-400">
-            Configure high-definition leopard-centric network streams and hardware internal cameras.
+            Configure CCTV network streams, hardware PC/Mobile feeds, and static monitoring photos.
           </p>
         </div>
 
@@ -222,7 +222,7 @@ export const CameraManagementPage: React.FC = () => {
             className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-lg shadow-emerald-950/50 transition flex items-center space-x-2"
           >
             <Plus className="w-4 h-4" />
-            <span>Add Hardware Source</span>
+            <span>Add Surveillance Source</span>
           </button>
         )}
       </div>
@@ -266,7 +266,9 @@ export const CameraManagementPage: React.FC = () => {
                 <div>
                   <h3 className="font-bold text-white text-sm">{cam.name}</h3>
                   <p className="text-[10px] text-slate-400 font-mono">
-                    {cam.sourceType === 'INTERNAL_HARDWARE' ? 'Hardware Dev' : `${cam.ipAddress}:${cam.port}`} [{cam.protocol}]
+                    {cam.sourceType === 'PC_MOBILE' ? 'PC/Mobile Camera' :
+                     cam.sourceType === 'STILL_PHOTO' ? 'Still Photo Source' :
+                     `${cam.ipAddress}:${cam.port}`} [{cam.protocol}]
                   </p>
                 </div>
                 <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
@@ -317,7 +319,7 @@ export const CameraManagementPage: React.FC = () => {
             className="border-2 border-dashed border-slate-800 rounded-2xl aspect-video flex flex-col items-center justify-center text-slate-500 hover:border-emerald-500 hover:text-emerald-500 transition-all bg-slate-900/40"
           >
             <Plus className="w-10 h-10 mb-2" />
-            <span className="font-bold text-sm">Add CCTV / Internal Hardware</span>
+            <span className="font-bold text-sm">Add CCTV / Hardware / Photo</span>
           </button>
         )}
       </div>
@@ -328,8 +330,8 @@ export const CameraManagementPage: React.FC = () => {
           <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl animate-fade-in">
             <div className="p-6 border-b border-slate-800 flex justify-between items-center sticky top-0 bg-slate-900 z-10">
               <div>
-                <h2 className="text-xl font-bold text-white">Add CCTV / Hardware Camera</h2>
-                <p className="text-xs text-slate-400">Restricted to IP/Network and direct hardware inputs for Farmer security</p>
+                <h2 className="text-xl font-bold text-white">Add Surveillance Source</h2>
+                <p className="text-xs text-slate-400">Support for CCTV, PC/Mobile cameras, and Still Photos for leopard detection</p>
               </div>
               <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-white">
                 <Trash2 className="w-5 h-5 rotate-45" />
@@ -408,17 +410,18 @@ export const CameraManagementPage: React.FC = () => {
                           setNewCam({
                             ...newCam,
                             sourceType: val,
-                            ipAddress: val === 'INTERNAL_HARDWARE' ? 'LOCAL_HOST' : newCam.ipAddress,
-                            protocol: val === 'INTERNAL_HARDWARE' ? 'WEBRTC' : newCam.protocol
+                            ipAddress: val === 'CCTV' ? newCam.ipAddress : 'LOCAL_HOST',
+                            protocol: val === 'CCTV' ? 'RTSP' : val === 'PC_MOBILE' ? 'WEBRTC' : 'HTTP'
                           });
                         }}
                       >
-                        <option value="IP_NETWORK">IP / CCTV Network Camera</option>
-                        <option value="INTERNAL_HARDWARE">Internal Hardware Camera (USB/Laptop/Mobile)</option>
+                        <option value="CCTV">CCTV Camera (IP/Network)</option>
+                        <option value="PC_MOBILE">PC / Mobile Camera</option>
+                        <option value="STILL_PHOTO">Still Photo / Snapshot Source</option>
                       </select>
                     </div>
 
-                    {newCam.sourceType === 'INTERNAL_HARDWARE' ? (
+                    {newCam.sourceType === 'PC_MOBILE' ? (
                       <div className="space-y-4">
                         <div className="space-y-1.5">
                           <label className="text-[10px] font-bold text-slate-500 uppercase">Detected Hardware</label>
@@ -450,6 +453,24 @@ export const CameraManagementPage: React.FC = () => {
                             <div className="w-1 h-1 bg-white rounded-full animate-pulse" />
                             <span>Internal Feed Active</span>
                           </div>
+                        </div>
+                      </div>
+                    ) : newCam.sourceType === 'STILL_PHOTO' ? (
+                      <div className="space-y-4">
+                        <div className="bg-slate-950 p-4 rounded-xl border border-dashed border-slate-800 flex flex-col items-center justify-center space-y-2">
+                          <Plus className="w-8 h-8 text-slate-600" />
+                          <span className="text-[10px] text-slate-500 font-bold uppercase">Upload Monitoring Photo</span>
+                          <p className="text-[9px] text-slate-600 text-center">Simulate detection by providing a static leopard-centric image path or URL.</p>
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-bold text-slate-500 uppercase">Image Source URL / Path</label>
+                          <input
+                            type="text"
+                            placeholder="/assets/monitoring/photo_01.jpg"
+                            className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-emerald-500 outline-none"
+                            value={newCam.streamPath}
+                            onChange={e => setNewCam({...newCam, streamPath: e.target.value})}
+                          />
                         </div>
                       </div>
                     ) : (
@@ -646,7 +667,7 @@ export const CameraManagementPage: React.FC = () => {
                 onClick={handleSaveCamera}
                 className="px-8 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg transition"
               >
-                Deploy Hardware Node
+                Deploy Surveillance Node
               </button>
             </div>
           </div>

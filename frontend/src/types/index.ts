@@ -1,6 +1,5 @@
 export type WildlifeSpecies = 
-  | 'leopard'
-  | 'human';
+  | 'leopard';
 
 export type ThreatLevel = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 
@@ -91,13 +90,9 @@ export type CameraStatus =
   | 'CRITICAL';
 
 export type CameraSourceType =
-  | 'IP_NETWORK'
-  | 'INTERNAL_HARDWARE'
-  | 'RTSP'
-  | 'HTTP_HLS'
-  | 'WEBRTC'
-  | 'BROWSER_WEBCAM'
-  | 'SIMULATION';
+  | 'CCTV'
+  | 'PC_MOBILE'
+  | 'STILL_PHOTO';
 
 export type CameraProtocol = 'RTSP' | 'HLS' | 'HTTP' | 'WEBRTC' | 'UDP' | 'TCP';
 
