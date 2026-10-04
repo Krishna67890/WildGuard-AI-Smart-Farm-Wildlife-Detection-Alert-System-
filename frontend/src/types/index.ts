@@ -1,5 +1,6 @@
 export type WildlifeSpecies = 
-  | 'leopard';
+  | 'leopard'
+  | 'human';
 
 export type ThreatLevel = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 
@@ -55,6 +56,7 @@ export interface Incident {
   timestamp: string;
   durationSeconds: number;
   snapshotUrl: string;
+  frameImageUrl?: string;
   bbox?: BoundingBox;
   alarmStatus: AlarmStatus;
   notificationStatus: 'SENT' | 'FAILED' | 'PENDING';
@@ -92,7 +94,10 @@ export type CameraStatus =
 export type CameraSourceType =
   | 'CCTV'
   | 'PC_MOBILE'
-  | 'STILL_PHOTO';
+  | 'STILL_PHOTO'
+  | 'BROWSER_WEBCAM'
+  | 'IP_NETWORK'
+  | 'SIMULATION';
 
 export type CameraProtocol = 'RTSP' | 'HLS' | 'HTTP' | 'WEBRTC' | 'UDP' | 'TCP';
 
