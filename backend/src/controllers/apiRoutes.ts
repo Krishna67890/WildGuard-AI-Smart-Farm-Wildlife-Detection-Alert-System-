@@ -245,6 +245,111 @@ apiRouter.post('/simulation/trigger', (req: Request, res: Response) => {
 // ==========================================
 // 8. EXTERNAL AI MODEL CONNECTOR (YOLOv8 / OpenCV)
 // ==========================================
+apiRouter.get('/ai/status', async (req: Request, res: Response) => {
+  const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://127.0.0.1:8000/health';
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 1200);
+    const response = await fetch(aiServiceUrl, { signal: controller.signal });
+    clearTimeout(timeout);
+    if (response.ok) {
+      const data = await response.json();
+      return res.json({ success: true, aiOnline: true, data });
+    }
+    return res.json({ success: false, aiOnline: false });
+  } catch (err: any) {
+    return res.json({ success: false, aiOnline: false, error: err.message });
+  }
+});
+
+apiRouter.post('/ai/detect-frame', async (req: Request, res: Response) => {
+  try {
+    const { image, frame, cameraId = 'cam-1', zoneId = 'zone-1' } = req.body;
+    const imagePayload = image || frame;
+
+    if (!imagePayload || typeof imagePayload !== 'string' || imagePayload.trim() === '') {
+      return res.status(400).json({ success: false, error: 'No valid image frame provided in request payload.' });
+    }
+
+    const aiEndpoint = process.env.AI_DETECT_URL || 'http://127.0.0.1:8000/detect';
+    let aiData: any;
+
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 3500);
+      let aiResponse: Response;
+      try {
+        aiResponse = await fetch(aiEndpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: imagePayload }),
+          signal: controller.signal
+        });
+      } finally {
+        // Always clear the timer regardless of success or failure
+        clearTimeout(timeout);
+      }
+
+      if (!aiResponse!.ok) {
+        throw new Error(`AI service responded with HTTP status ${aiResponse!.status}`);
+      }
+      const rawData = await aiResponse!.json();
+      // Guard against the AI service returning a non-object (e.g. null, array)
+      aiData = (rawData !== null && typeof rawData === 'object' && !Array.isArray(rawData))
+        ? rawData
+        : {};
+    } catch (aiErr: any) {
+      return res.status(503).json({
+        success: false,
+        error: 'AI Detection Service is offline or unreachable on port 8000. Start it with: python yolo_detector.py',
+        details: aiErr.message
+      });
+    }
+
+    const { detections = [], leopardAlert = false, alarmTriggered = false, isCoolingDown = false, cooldownRemaining = 0 } = aiData;
+
+    let processedDetection: any = null;
+    let incidentCreated = false;
+
+    // If any detections were found, evaluate the highest-priority target through the Threat Engine
+    if (detections.length > 0) {
+      // Prioritize leopard detections, otherwise use highest confidence detection
+      const primaryTarget = detections.find((d: any) => d.species === 'leopard') || detections[0];
+
+      const threatResult = aiDetection.processDetection({
+        species: primaryTarget.species as WildlifeSpecies,
+        confidence: primaryTarget.confidence,
+        bbox: primaryTarget.bbox,
+        cameraId,
+        zoneId,
+        distanceToBoundaryMeters: primaryTarget.species === 'leopard' ? 8.5 : 18.0,
+        durationSeconds: 5,
+        direction: 'APPROACHING',
+        humanPresent: detections.some((d: any) => d.species === 'human'),
+        animalCount: detections.filter((d: any) => d.species !== 'human').length || 1,
+        isSimulatedTrigger: false
+      });
+
+      processedDetection = threatResult.detection;
+      incidentCreated = threatResult.incidentCreated;
+    }
+
+    res.json({
+      success: true,
+      detections,
+      leopardAlert,
+      alarmTriggered,
+      isCoolingDown,
+      cooldownRemaining,
+      incidentCreated,
+      detection: processedDetection
+    });
+  } catch (err: any) {
+    console.error('[detect-frame] Error processing detection request:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 apiRouter.post('/ai/external-detection', (req: Request, res: Response) => {
   const {
     species,

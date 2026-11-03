@@ -1,0 +1,11 @@
+# WildGuard AI - Python Edge Inference Dependencies
+# Core deep learning vision engine & video processing
+ultralytics>=8.0.0
+opencv-python>=4.8.0
+
+# Non-blocking acoustic alert siren audio player
+pygame>=2.6.0
+
+# API communication & numerical operations
+requests>=2.31.0
+numpy>=1.24.0
