@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  ShieldAlert, ShieldCheck, AlertTriangle, Radio, Activity, 
-  Cpu, Bell, CheckCircle2, Volume2, VolumeX, Eye, ArrowUpRight, 
-  MapPin, Clock, Zap, Sparkles 
+import {
+  ShieldAlert, ShieldCheck, AlertTriangle, Radio, Activity,
+  Cpu, Bell, CheckCircle2, Volume2, VolumeX, Eye, ArrowUpRight,
+  MapPin, Clock, Zap, Sparkles, Video, CameraOff
 } from 'lucide-react';
 import { useAlert } from '../context/AlertContext';
 import { fetchApi } from '../services/api';
 import { Incident, Zone, Camera } from '../types/index';
 import { CameraPlayer } from '../components/live/CameraPlayer';
+import { LiveWebcamFeed } from '../components/live/LiveWebcamFeed';
 
 interface DashboardProps {
   onNavigate: (tab: string) => void;
@@ -30,6 +31,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({ onNavigate }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [cameras, setCameras] = useState<Camera[]>([]);
   const [primaryCamera, setPrimaryCamera] = useState<Camera | null>(null);
+  const [isWebcamActive, setIsWebcamActive] = useState<boolean>(false);
 
   const loadData = async () => {
     try {
@@ -71,7 +73,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({ onNavigate }) => {
 
   return (
     <div className="space-y-6">
-      
+
       {/* Top Banner Alert Bar (Flashing if Alarm Active) */}
       <div className={`p-4 rounded-2xl border transition-all duration-300 flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
         isSirenActive
@@ -94,7 +96,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({ onNavigate }) => {
               </span>
             </div>
             <p className="text-xs text-slate-300">
-              {isSirenActive 
+              {isSirenActive
                 ? 'Apex wildlife detected inside critical farm boundary. Acoustic deterrent active on ESP32 node.'
                 : 'Continuous optical AI surveillance across 4 sectors with false-alarm temporal verification.'}
             </p>
@@ -125,7 +127,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({ onNavigate }) => {
 
       {/* 4 Stat KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        
+
         {/* Total Incidents */}
         <div className="bg-slate-900/80 p-4 rounded-xl border border-slate-800 shadow-lg space-y-2">
           <div className="flex items-center justify-between text-slate-400 text-xs">
@@ -182,11 +184,11 @@ export const DashboardPage: React.FC<DashboardProps> = ({ onNavigate }) => {
 
       {/* Center Layout: Live Surveillance Box & High-Risk Zones */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
+
         {/* Live Surveillance Area (2 Cols) */}
         <div className="lg:col-span-2 space-y-4">
           <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 space-y-4">
-            
+
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <span className="relative flex h-3 w-3">
@@ -198,21 +200,37 @@ export const DashboardPage: React.FC<DashboardProps> = ({ onNavigate }) => {
                 </h2>
               </div>
 
-              <div className="flex items-center space-x-4">
-                <select
-                  className="bg-slate-950 border border-slate-800 text-[10px] font-bold text-emerald-400 rounded-lg px-2 py-1 outline-none focus:border-emerald-500 transition-all"
-                  value={primaryCamera?.id || ''}
-                  onChange={(e) => {
-                    const cam = cameras.find(c => c.id === e.target.value);
-                    if (cam) setPrimaryCamera(cam);
-                  }}
+              <div className="flex items-center space-x-3">
+                {/* Live Webcam Toggle Button (Requirement 1) */}
+                <button
+                  onClick={() => setIsWebcamActive(!isWebcamActive)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center space-x-1.5 transition-all shadow-md ${
+                    isWebcamActive
+                      ? 'bg-rose-600 hover:bg-rose-500 text-white animate-pulse'
+                      : 'bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30 border border-emerald-500/40'
+                  }`}
+                  title={isWebcamActive ? "Stop live webcam detection" : "Enable camera for live AI leopard detection"}
                 >
-                  {cameras.map(cam => (
-                    <option key={cam.id} value={cam.id}>
-                      {cam.name}
-                    </option>
-                  ))}
-                </select>
+                  {isWebcamActive ? <CameraOff className="w-3.5 h-3.5" /> : <Video className="w-3.5 h-3.5" />}
+                  <span>{isWebcamActive ? 'Stop Live Webcam' : 'Start Live Webcam'}</span>
+                </button>
+
+                {!isWebcamActive && (
+                  <select
+                    className="bg-slate-950 border border-slate-800 text-[10px] font-bold text-emerald-400 rounded-lg px-2 py-1 outline-none focus:border-emerald-500 transition-all"
+                    value={primaryCamera?.id || ''}
+                    onChange={(e) => {
+                      const cam = cameras.find(c => c.id === e.target.value);
+                      if (cam) setPrimaryCamera(cam);
+                    }}
+                  >
+                    {cameras.map(cam => (
+                      <option key={cam.id} value={cam.id}>
+                        {cam.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
 
                 <button
                   onClick={() => onNavigate('live')}
@@ -224,48 +242,56 @@ export const DashboardPage: React.FC<DashboardProps> = ({ onNavigate }) => {
               </div>
             </div>
 
-            {/* Live Camera Stream Simulator Frame */}
-            <div className="relative aspect-video rounded-xl overflow-hidden bg-black border border-slate-800 shadow-inner group cursor-pointer" onClick={() => onNavigate('live')}>
+            {/* Live Camera Stream Simulator or Live User Webcam Frame */}
+            {isWebcamActive ? (
+              <LiveWebcamFeed
+                onStop={() => setIsWebcamActive(false)}
+                cameraId={primaryCamera?.id || 'cam-1'}
+                zoneId={primaryCamera?.zoneId || 'zone-1'}
+              />
+            ) : (
+              <div className="relative aspect-video rounded-xl overflow-hidden bg-black border border-slate-800 shadow-inner group cursor-pointer" onClick={() => onNavigate('live')}>
 
-              {primaryCamera ? (
-                <CameraPlayer
-                  camera={{
-                    ...primaryCamera,
-                    currentDetection: (rawDetection && rawDetection.cameraId === primaryCamera.id) ? rawDetection : (activeAlert?.cameraId === primaryCamera.id ? {
-                      threatLevel: activeAlert.threatLevel,
-                      species: activeAlert.species,
-                      confidence: activeAlert.confidence,
-                      distanceMeters: 14,
-                      direction: 'APPROACHING',
-                      timestamp: activeAlert.timestamp,
-                      bbox: activeAlert.bbox
-                    } : undefined)
-                  }}
-                  isNightVision={false}
-                  isFocused={true}
-                />
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center text-slate-500 font-mono text-xs">
-                  NO ACTIVE CAMERA STREAM
+                {primaryCamera ? (
+                  <CameraPlayer
+                    camera={{
+                      ...primaryCamera,
+                      currentDetection: (rawDetection && rawDetection.cameraId === primaryCamera.id) ? rawDetection : (activeAlert?.cameraId === primaryCamera.id ? {
+                        threatLevel: activeAlert.threatLevel,
+                        species: activeAlert.species,
+                        confidence: activeAlert.confidence,
+                        distanceMeters: 14,
+                        direction: 'APPROACHING',
+                        timestamp: activeAlert.timestamp,
+                        bbox: activeAlert.bbox
+                      } : undefined)
+                    }}
+                    isNightVision={false}
+                    isFocused={true}
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center text-slate-500 font-mono text-xs">
+                    NO ACTIVE CAMERA STREAM
+                  </div>
+                )}
+
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
+
+                {/* Camera metadata tags */}
+                <div className="absolute top-3 left-3 text-[11px] font-mono text-emerald-400 bg-slate-950/80 px-2 py-1 rounded">
+                  {primaryCamera?.name || 'CAM-01'} ● LIVE {primaryCamera?.fps || 30} FPS
                 </div>
-              )}
-
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
-
-              {/* Camera metadata tags */}
-              <div className="absolute top-3 left-3 text-[11px] font-mono text-emerald-400 bg-slate-950/80 px-2 py-1 rounded">
-                {primaryCamera?.name || 'CAM-01'} ● LIVE {primaryCamera?.fps || 30} FPS
+                <div className="absolute top-3 right-3 text-[11px] font-mono text-slate-300 bg-slate-950/80 px-2 py-1 rounded">
+                  ZONE: {primaryCamera?.sector || 'North Forest Perimeter'}
+                </div>
+                <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-xs text-slate-200">
+                  <span>Threat Diagnosis: <strong className={activeAlert ? 'text-rose-400' : 'text-emerald-400'}>
+                    {activeAlert ? 'Apex Predator Advancing Towards Zone' : 'Perimeter Secure - Normal Activity'}
+                  </strong></span>
+                  <span className="text-[11px] text-slate-400">Click to expand PTZ controls &rarr;</span>
+                </div>
               </div>
-              <div className="absolute top-3 right-3 text-[11px] font-mono text-slate-300 bg-slate-950/80 px-2 py-1 rounded">
-                ZONE: {primaryCamera?.sector || 'North Forest Perimeter'}
-              </div>
-              <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-xs text-slate-200">
-                <span>Threat Diagnosis: <strong className={activeAlert ? 'text-rose-400' : 'text-emerald-400'}>
-                  {activeAlert ? 'Apex Predator Advancing Towards Zone' : 'Perimeter Secure - Normal Activity'}
-                </strong></span>
-                <span className="text-[11px] text-slate-400">Click to expand PTZ controls &rarr;</span>
-              </div>
-            </div>
+            )}
 
             {/* Quick stats strip below camera */}
             <div className="grid grid-cols-3 gap-2 text-center text-xs">
@@ -290,7 +316,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({ onNavigate }) => {
 
         {/* High-Risk Zones & AI Insight (1 Col) */}
         <div className="space-y-4">
-          
+
           {/* AI-Generated Insight Box */}
           <div className="bg-gradient-to-br from-slate-900 to-emerald-950/60 p-5 rounded-2xl border border-emerald-500/30 space-y-3">
             <div className="flex items-center space-x-2 text-emerald-400">
@@ -349,7 +375,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({ onNavigate }) => {
 
       {/* Recent Alerts & Incidents Table */}
       <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 space-y-4">
-        
+
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-sm font-bold text-white uppercase tracking-wider">
