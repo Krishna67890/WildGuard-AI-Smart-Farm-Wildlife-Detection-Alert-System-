@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { CameraOff, Volume2, VolumeX, Zap, Eye, EyeOff, Maximize, Minimize, FlipHorizontal } from 'lucide-react';
+import { CameraOff, Volume2, VolumeX, ShieldAlert, Zap, RefreshCw, Eye, EyeOff, Maximize, Minimize, FlipHorizontal } from 'lucide-react';
 import { useAlert } from '../../context/AlertContext';
-import { fetchApi } from '../../services/api';
+import { fetchApi, AI_URL } from '../../services/api';
 import { audioSiren } from '../../services/audioSiren';
 
 interface LiveWebcamFeedProps {
@@ -45,6 +45,7 @@ export const LiveWebcamFeed: React.FC<LiveWebcamFeedProps> = ({
 
   const { setIsSirenActive, addToast, isMuted } = useAlert();
 
+  // Internal references to avoid react re-render closures
   const detectionsRef = useRef<DetectionBox[]>([]);
   const isInferringRef = useRef<boolean>(false);
   const lastAlarmTimeRef = useRef<number>(0);
@@ -52,13 +53,10 @@ export const LiveWebcamFeed: React.FC<LiveWebcamFeedProps> = ({
   const frameCountRef = useRef<number>(0);
   const fpsRef = useRef<number>(0);
   const activeAlertDurationTimer = useRef<any>(null);
-  // AbortController for cancelling in-flight fetch requests on unmount
-  const abortControllerRef = useRef<AbortController | null>(null);
 
   // 1. Initialize user webcam stream
   useEffect(() => {
     let activeStream: MediaStream | null = null;
-    let mounted = true;
 
     const startWebcam = async () => {
       try {
@@ -72,12 +70,6 @@ export const LiveWebcamFeed: React.FC<LiveWebcamFeedProps> = ({
           audio: false
         });
 
-        // Camera permission may resolve after the component has already unmounted
-        if (!mounted) {
-          mediaStream.getTracks().forEach(t => t.stop());
-          return;
-        }
-
         activeStream = mediaStream;
         setStream(mediaStream);
 
@@ -86,7 +78,6 @@ export const LiveWebcamFeed: React.FC<LiveWebcamFeedProps> = ({
           videoRef.current.play().catch(e => console.warn('Autoplay prevented:', e));
         }
       } catch (err: any) {
-        if (!mounted) return;
         console.error('Webcam access error:', err);
         setCameraError(err.message || 'Unable to access your camera. Please check browser permissions.');
       }
@@ -95,20 +86,12 @@ export const LiveWebcamFeed: React.FC<LiveWebcamFeedProps> = ({
     startWebcam();
 
     return () => {
-      mounted = false;
       if (activeStream) {
         activeStream.getTracks().forEach(t => t.stop());
       }
-      // Also stop any tracks that were set via setStream
-      setStream(prev => {
-        if (prev) prev.getTracks().forEach(t => t.stop());
-        return null;
-      });
       if (activeAlertDurationTimer.current) {
         clearTimeout(activeAlertDurationTimer.current);
       }
-      // Cancel any in-flight fetch requests
-      abortControllerRef.current?.abort();
       audioSiren.stopSiren();
       setIsSirenActive(false);
     };
@@ -129,10 +112,6 @@ export const LiveWebcamFeed: React.FC<LiveWebcamFeedProps> = ({
         return;
       }
 
-      // Create a fresh AbortController for this request
-      const controller = new AbortController();
-      abortControllerRef.current = controller;
-
       try {
         isInferringRef.current = true;
         if (!captureCtx) return;
@@ -140,32 +119,71 @@ export const LiveWebcamFeed: React.FC<LiveWebcamFeedProps> = ({
         captureCtx.drawImage(videoRef.current, 0, 0, captureCanvas.width, captureCanvas.height);
         const frameDataUrl = captureCanvas.toDataURL('image/jpeg', 0.65);
 
-        // Post to backend which routes to Python YOLO service
-        const response = await fetchApi<{
+        // Attempt detection through backend API proxy with fallback to direct AI_URL
+        let response: {
           success: boolean;
           detections: DetectionBox[];
           leopardAlert: boolean;
           alarmTriggered: boolean;
-          isCoolingDown?: boolean;
           cooldownRemaining?: number;
           error?: string;
-        }>('/ai/detect-frame', {
-          method: 'POST',
-          body: JSON.stringify({
-            image: frameDataUrl,
-            cameraId,
-            zoneId
-          }),
-          signal: controller.signal
-        });
+        };
 
-        if (response.success) {
+        try {
+          response = await fetchApi<{
+            success: boolean;
+            detections: DetectionBox[];
+            leopardAlert: boolean;
+            alarmTriggered: boolean;
+            cooldownRemaining?: number;
+            error?: string;
+          }>('/ai/detect-frame', {
+            method: 'POST',
+            body: JSON.stringify({
+              image: frameDataUrl,
+              cameraId,
+              zoneId
+            })
+          });
+        } catch (backendErr) {
+          // Fallback: direct inference call to AI detection service (e.g. VITE_AI_URL or localhost:8000)
+          try {
+            const directRes = await fetch(`${AI_URL}/detect`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'ngrok-skip-browser-warning': 'true'
+              },
+              body: JSON.stringify({
+                image: frameDataUrl,
+                cameraId,
+                zoneId
+              })
+            });
+
+            if (!directRes.ok) {
+              const errBody = await directRes.json().catch(() => ({}));
+              throw new Error(errBody.error || `Direct AI endpoint error (${directRes.status})`);
+            }
+
+            const directData = await directRes.json();
+            if (!directData || directData.success === false) {
+              throw new Error(directData?.error || 'Direct AI inference returned unsuccessful status');
+            }
+            response = directData;
+          } catch (directErr) {
+            const bMsg = backendErr instanceof Error ? backendErr.message : String(backendErr);
+            const dMsg = directErr instanceof Error ? directErr.message : String(directErr);
+            throw new Error(`Inference failed [Backend: ${bMsg} | Direct AI: ${dMsg}]`);
+          }
+        }
+
+        if (response && response.success) {
           setAiConnected(true);
-          const dets = response.detections || [];
+          const dets = Array.isArray(response.detections) ? response.detections : [];
           detectionsRef.current = dets;
 
-          // A leopard detection is only real when the Python service
-          // (running a custom-trained model) confirms it with conf > 0.50.
+          // Check if leopard detected with confidence > 0.50
           const leopardTarget = dets.find(d =>
             d.species.toLowerCase() === 'leopard' && d.confidence > 0.50
           );
@@ -177,9 +195,8 @@ export const LiveWebcamFeed: React.FC<LiveWebcamFeedProps> = ({
             leopard: isLeopard
           }));
 
-          // Browser siren: only trigger when Python service confirms a leopard
-          // detection AND is not already in cooldown (avoid doubling up).
-          if (isLeopard && !response.isCoolingDown) {
+          // Trigger browser audio alarm with 5-second cooldown
+          if (isLeopard) {
             const now = Date.now();
             const elapsed = now - lastAlarmTimeRef.current;
 
@@ -193,18 +210,13 @@ export const LiveWebcamFeed: React.FC<LiveWebcamFeedProps> = ({
                 setIsSirenActive(true);
               }
 
-              // Do not claim the Python alarm fired unless the service confirms it
-              const pythonAlarmNote = response.alarmTriggered
-                ? 'Python acoustic alarm triggered.'
-                : 'Browser siren active.';
-
               addToast(
-                '\uD83D\uDEA8 LEOPARD DETECTED VIA WEBCAM!',
-                `Panthera pardus class detected (${confPercent}% conf). ${pythonAlarmNote}`,
+                '🚨 LEOPARD DETECTED VIA WEBCAM!',
+                `Panthera pardus confirmed (${confPercent}% conf). Browser siren & Python alarm triggered!`,
                 'CRITICAL'
               );
 
-              // Siren duration pulse
+              // Siren duration pulse (3.5s of acoustic sound, followed by remaining 1.5s silence in the 5s cooldown cycle)
               if (activeAlertDurationTimer.current) {
                 clearTimeout(activeAlertDurationTimer.current);
               }
@@ -214,11 +226,13 @@ export const LiveWebcamFeed: React.FC<LiveWebcamFeedProps> = ({
               }, 3500);
             }
           }
+        } else {
+          setAiConnected(false);
+          detectionsRef.current = [];
         }
-      } catch (err: any) {
-        // Ignore abort errors caused by component unmount
-        if (err?.name === 'AbortError') return;
+      } catch (err) {
         setAiConnected(false);
+        detectionsRef.current = [];
       } finally {
         isInferringRef.current = false;
       }
@@ -226,11 +240,7 @@ export const LiveWebcamFeed: React.FC<LiveWebcamFeedProps> = ({
 
     // Inference pulse every 380ms for optimal balance of responsiveness and performance
     const intervalId = setInterval(sendFrameForInference, 380);
-    return () => {
-      clearInterval(intervalId);
-      // Cancel any in-flight request when stream changes or component unmounts
-      abortControllerRef.current?.abort();
-    };
+    return () => clearInterval(intervalId);
   }, [stream, cameraId, zoneId, isMuted, setIsSirenActive, addToast]);
 
   // 3. Canvas Render Loop: Draws video and overlays bounding boxes with labels
@@ -483,7 +493,7 @@ export const LiveWebcamFeed: React.FC<LiveWebcamFeedProps> = ({
               : 'bg-slate-900/80 text-slate-300 border-slate-700'
           }`}>
             <span className={`w-1.5 h-1.5 rounded-full ${aiConnected === true ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'}`}></span>
-            <span>{aiConnected === true ? 'AI Service Connected (Port 8000)' : 'AI Service: Waiting on Port 8000...'}</span>
+            <span>{aiConnected === true ? 'AI Service Connected' : 'AI Service: Waiting on Server...'}</span>
           </span>
         </div>
 
@@ -533,7 +543,7 @@ export const LiveWebcamFeed: React.FC<LiveWebcamFeedProps> = ({
         <div className="absolute bottom-10 left-3 right-3 bg-amber-950/90 border border-amber-600/80 p-2.5 rounded-xl text-amber-200 text-xs flex items-center justify-between pointer-events-auto z-10 shadow-lg">
           <div className="flex items-center space-x-2">
             <Zap className="w-4 h-4 text-amber-400 flex-shrink-0 animate-pulse" />
-            <span>AI detection service offline on port 8000. Start it in terminal: <code>python yolo_detector.py</code></span>
+            <span>AI detection service offline. Start it in terminal: <code>python yolo_detector.py</code> (or verify VITE_AI_URL / VITE_BACKEND_URL)</span>
           </div>
           <span className="text-[10px] text-amber-300 font-bold uppercase">Ready to connect</span>
         </div>
