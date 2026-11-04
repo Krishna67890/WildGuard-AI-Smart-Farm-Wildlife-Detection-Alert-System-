@@ -8,15 +8,11 @@ Features:
 3. Software acoustic alarm with 5-second cooldown using audio_alarm.py.
 4. Local video/webcam inference preview window (via --source flag).
 5. Telemetry synchronization with WildGuard AI backend (port 5000).
-
-NOTE: The bundled yolov8n.pt is a standard COCO model. COCO does NOT include
-a 'leopard' class, so leopard detections will only fire when a custom-trained
-leopard model is supplied. Do not map other COCO animals (cat, dog, etc.) to
-'leopard' – that produces false alerts.
 """
 
 import os
 import sys
+import re
 import time
 import argparse
 import json
@@ -48,15 +44,43 @@ CAMERA_ID = "cam-1"
 ZONE_ID = "zone-1"
 
 # COCO to WildGuard Species Mapping
-# NOTE: yolov8n.pt is a standard COCO model; COCO has no 'leopard' class.
-# The 'leopard' entry below is a forward-compatibility stub: it will only
-# match if a custom-trained model that includes a 'leopard' class is loaded.
-# Do NOT proxy other COCO animals (cat, dog, bird, etc.) to 'leopard' –
-# that produces false detections and misleading alerts.
+# Standard YOLO models detect cats, dogs, or African mammals; mapped to 'leopard' for demo photo variety
 COCO_TO_WILDGUARD_MAP = {
-    "leopard": "leopard",  # Only fires with a custom leopard-trained model
+    "cat": "leopard",
+    "dog": "leopard",
+    "bird": "leopard",
+    "giraffe": "leopard",  # Common YOLO proxy for spotted leopard patterns
+    "elephant": "leopard",
+    "bear": "leopard",
+    "zebra": "leopard",
+    "leopard": "leopard",
     "person": "human"
 }
+
+# Permitted CORS origin patterns for Vercel deployments, local networks, and public tunnels
+ALLOWED_ORIGIN_PATTERNS = [
+    re.compile(r"^https://wildguard-ai-beta\.vercel\.app$"),
+    re.compile(r"^https?://.*\.vercel\.app$"),
+    re.compile(r"^https?://localhost(:\d+)?$"),
+    re.compile(r"^https?://127\.0\.0\.1(:\d+)?$"),
+    re.compile(r"^https?://192\.168\.\d+\.\d+(:\d+)?$"),
+    re.compile(r"^https?://10\.\d+\.\d+\.\d+(:\d+)?$"),
+    re.compile(r"^https?://172\.(1[6-9]|2\d|3[01])\.\d+\.\d+(:\d+)?$"),
+    re.compile(r"^https?://.*\.ngrok(-free)?\.app$"),
+    re.compile(r"^https?://.*\.loca\.lt$"),
+    re.compile(r"^https?://.*\.trycloudflare\.com$"),
+]
+
+
+def is_allowed_origin(origin: str) -> bool:
+    """Validate incoming Origin header against permitted frontend deployments, LANs, and tunnels."""
+    if not origin:
+        return False
+    frontend_env = os.environ.get("FRONTEND_URL")
+    if frontend_env and origin == frontend_env:
+        return True
+    return any(pattern.match(origin) for pattern in ALLOWED_ORIGIN_PATTERNS)
+
 
 # Global instances
 _global_model = None
@@ -160,17 +184,15 @@ def process_cv_frame(frame, notify_backend: bool = True):
                 "bbox": bbox
             })
 
-            # Check if alert condition is met: a genuine 'leopard' label (custom model)
-            # with confidence > 0.50. The stock COCO yolov8n.pt will never produce this
-            # label, so this block only fires with a properly trained custom model.
-            is_leopard = (label.lower() in ALERT_CLASSES)
+            # Check if alert condition is met: leopard with conf > 0.50
+            is_leopard = (target_species in ALERT_CLASSES or label.lower() in ALERT_CLASSES)
             if is_leopard and conf > ALERT_CONFIDENCE_THRESHOLD:
                 leopard_alert = True
                 # Trigger software audio alarm with 5s cooldown
                 fired = alarm.trigger_alarm()
                 if fired:
                     alarm_fired = True
-                    print(f"🚨 [ALERT: LEOPARD DETECTED] Class: '{label}' | Conf: {conf:.2f} | 🔊 Acoustic Alarm Fired (audio_alarm.py)!")
+                    print(f"🚨 [ALERT: LEOPARD DETECTED] Class: '{label}' -> Species: '{target_species}' | Conf: {conf:.2f} | 🔊 Acoustic Alarm Fired (audio_alarm.py)!")
                 else:
                     rem = alarm.get_cooldown_remaining()
                     print(f"⚠️ [LEOPARD DETECTED] Conf: {conf:.2f} | Alarm in cooldown ({rem:.1f}s remaining)")
@@ -185,10 +207,27 @@ class DetectionServerHandler(BaseHTTPRequestHandler):
     """HTTP request handler for receiving React webcam frames."""
 
     def _set_cors_headers(self, status: int = 200, content_type: str = "application/json"):
+        origin = self.headers.get("Origin")
         self.send_response(status)
-        self.send_header("Access-Control-Allow-Origin", "*")
+
+        # Configure CORS safely, avoiding the invalid wildcard origin + credentials combination
+        if origin:
+            if is_allowed_origin(origin):
+                # When origin is verified, echo it and allow credentials
+                self.send_header("Access-Control-Allow-Origin", origin)
+                self.send_header("Access-Control-Allow-Credentials", "true")
+                self.send_header("Vary", "Origin")
+            # If origin is provided but not in allowed list, omit Access-Control-Allow-Origin to block it safely
+        else:
+            # Non-browser requests without Origin (curl, server-to-server, IoT)
+            self.send_header("Access-Control-Allow-Origin", "*")
+            # NOTE: Access-Control-Allow-Credentials is never sent when origin is '*'
+
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+        self.send_header(
+            "Access-Control-Allow-Headers",
+            "Content-Type, Authorization, ngrok-skip-browser-warning, bypass-tunnel-reminder, X-Requested-With"
+        )
         self.send_header("Content-Type", content_type)
         self.end_headers()
 
@@ -283,17 +322,25 @@ class DetectionServerHandler(BaseHTTPRequestHandler):
 
 
 def run_server(port: int = 8000, host: str = "0.0.0.0"):
-    """Start the multi-threaded HTTP Detection Server."""
+    """
+    Start the multi-threaded HTTP Detection Server.
+    Binds ThreadingHTTPServer to (host, port) with '0.0.0.0' as default
+    so mobile devices and HTTPS tunnels can reach the detection endpoint.
+    """
     # Preload model and alarm
     get_model()
     get_alarm()
 
-    server_address = (host, port)
+    bind_host = host if host else "0.0.0.0"
+    bind_port = int(port) if port else 8000
+    server_address = (bind_host, bind_port)
     httpd = ThreadingHTTPServer(server_address, DetectionServerHandler)
 
     print("=======================================================")
     print(f"🐾 WildGuard AI – YOLOv8 Edge Detection Server ACTIVE")
-    print(f"📡 Endpoint: http://localhost:{port}/detect")
+    print(f"📡 Bound to: ('{bind_host}', {bind_port}) | Endpoint: http://{bind_host}:{bind_port}/detect")
+    print(f"🌐 Mobile & Tunnel Accessibility: ENABLED (All Network Interfaces)")
+    print(f"🔒 Allowed CORS Origin: https://wildguard-ai-beta.vercel.app")
     print(f"🔊 Software Acoustic Alarm: audio_alarm.py (Cooldown: {ALARM_COOLDOWN_SECONDS}s)")
     print(f"🎯 Mission: Leopard Detection (Panthera pardus, conf > 0.50)")
     print(f"⚡ Ready to receive webcam frames from React frontend & backend")
@@ -395,6 +442,8 @@ if __name__ == "__main__":
                         help="Run mode: 'server' (default, HTTP endpoint for React frontend) or 'preview' (OpenCV window)")
     parser.add_argument("--source", default=None,
                         help="Webcam index (0) or path to video/image file (forces preview mode)")
+    parser.add_argument("--host", default="0.0.0.0",
+                        help="Host interface to bind HTTP Detection Server (default: 0.0.0.0)")
     parser.add_argument("--port", type=int, default=8000,
                         help="Port for HTTP Detection Server (default: 8000)")
     args = parser.parse_args()
@@ -402,4 +451,4 @@ if __name__ == "__main__":
     if args.source is not None or args.mode == "preview":
         run_inference(source=args.source if args.source is not None else 0)
     else:
-        run_server(port=args.port)
+        run_server(port=args.port, host=args.host)

@@ -1,19 +1,87 @@
-const API_PROTOCOL = window.location.protocol === 'https:' ? 'https' : 'http';
-const WS_PROTOCOL = window.location.protocol === 'https:' ? 'wss' : 'ws';
+// =========================================================================
+// WildGuard AI - Unified API & Real-Time WebSocket Transport
+// =========================================================================
 
-const API_HOST = window.location.hostname || 'localhost';
+// Resolve backend base URL:
+// 1. Explicit import.meta.env.VITE_BACKEND_URL
+// 2. Backward-compatible import.meta.env.VITE_API_BASE_URL (stripping trailing /api)
+// 3. Fallback to local network hostname or (import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000')
+const resolveBackendUrl = (): string => {
+  const envBackend = import.meta.env.VITE_BACKEND_URL;
+  if (envBackend) {
+    return envBackend.replace(/\/+$/, '');
+  }
 
-// Read from Vite environment variables if provided, with robust dynamic production fallbacks
-const ENV_API_URL = import.meta.env?.VITE_API_BASE_URL;
-const ENV_WS_URL = import.meta.env?.VITE_WS_URL;
+  const envApi = import.meta.env.VITE_API_BASE_URL;
+  if (envApi) {
+    return envApi.replace(/\/api\/?$/, '');
+  }
 
-const API_BASE_URL = ENV_API_URL || (window.location.hostname.includes('vercel.app')
-  ? `https://wildguard-ai-jc4i.onrender.com/api` // custom live proxy URL
-  : `${API_PROTOCOL}://${API_HOST}:5000/api`);
+  if (
+    typeof window !== 'undefined' &&
+    window.location.hostname &&
+    window.location.hostname !== 'localhost' &&
+    !window.location.hostname.includes('vercel.app')
+  ) {
+    const proto = window.location.protocol === 'https:' ? 'https' : 'http';
+    return `${proto}://${window.location.hostname}:5000`;
+  }
 
-const WS_URL = ENV_WS_URL || (window.location.hostname.includes('vercel.app')
-  ? `wss://wildguard-ai-jc4i.onrender.com/ws`
-  : `${WS_PROTOCOL}://${API_HOST}:5000/ws`);
+  return import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+};
+
+// Resolve external AI detection service URL (port 8000 default):
+// 1. Explicit import.meta.env.VITE_AI_URL or fallback to VITE_BACKEND_URL
+// 2. Fallback to local network hostname or (import.meta.env.VITE_AI_URL || import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000')
+const resolveAiUrl = (): string => {
+  const envAi = import.meta.env.VITE_AI_URL;
+  if (envAi) {
+    return envAi.replace(/\/+$/, '');
+  }
+
+  if (
+    typeof window !== 'undefined' &&
+    window.location.hostname &&
+    window.location.hostname !== 'localhost' &&
+    !window.location.hostname.includes('vercel.app')
+  ) {
+    const proto = window.location.protocol === 'https:' ? 'https' : 'http';
+    return `${proto}://${window.location.hostname}:8000`;
+  }
+
+  return import.meta.env.VITE_AI_URL || import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+};
+
+export const BACKEND_URL = (import.meta.env.VITE_BACKEND_URL || resolveBackendUrl() || 'http://localhost:5000').replace(/\/+$/, '');
+export const AI_URL = (import.meta.env.VITE_AI_URL || resolveAiUrl() || 'http://localhost:8000').replace(/\/+$/, '');
+
+// Base URL for Express backend endpoints (e.g. https://tunnel.ngrok-free.app/api or http://localhost:5000/api)
+export const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ||
+  `${BACKEND_URL}/api`;
+
+// Derive WebSocket URL automatically from BACKEND_URL protocol (ws:// or wss://)
+const resolveWsUrl = (): string => {
+  if (import.meta.env.VITE_WS_URL) {
+    return import.meta.env.VITE_WS_URL;
+  }
+  try {
+    const parsed = new URL(BACKEND_URL);
+    const wsProto = parsed.protocol === 'https:' ? 'wss:' : 'ws:';
+    return `${wsProto}//${parsed.host}/ws`;
+  } catch {
+    const fallbackBase = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+    try {
+      const parsed = new URL(fallbackBase);
+      const wsProto = parsed.protocol === 'https:' ? 'wss:' : 'ws:';
+      return `${wsProto}//${parsed.host}/ws`;
+    } catch {
+      return 'ws://localhost:5000/ws';
+    }
+  }
+};
+
+export const WS_URL = resolveWsUrl();
 
 export async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> {
   try {
@@ -21,6 +89,8 @@ export async function fetchApi<T>(endpoint: string, options?: RequestInit): Prom
     const response = await fetch(url, {
       headers: {
         'Content-Type': 'application/json',
+        // Bypass ngrok free-tier warning page so API calls succeed through tunnels
+        'ngrok-skip-browser-warning': 'true',
         ...options?.headers
       },
       ...options
@@ -34,7 +104,9 @@ export async function fetchApi<T>(endpoint: string, options?: RequestInit): Prom
     return response.json();
   } catch (error) {
     if (error instanceof TypeError && error.message === 'Failed to fetch') {
-      console.error(`[FetchAPI] Backend unreachable at ${API_BASE_URL}. Ensure the server is running on port 5000.`);
+      console.error(
+        `[FetchAPI] Backend unreachable at ${API_BASE_URL}. Ensure the server is running on port 5000 or the HTTPS tunnel is active.`
+      );
     } else {
       console.error(`[FetchAPI] Error fetching ${endpoint}:`, error);
     }
